@@ -60,6 +60,8 @@ def shape_prior(question: str, link: LinkResult) -> dict[str, float]:
         prior["aggregate"] = 6.0
     if any(f" {w} " in q for w in ("most", "least", "highest", "lowest", "cheapest", "newest", "oldest", "biggest", "largest", "smallest", "fastest", "earliest", "latest", "first", "last")):
         prior["superlative"] = 4.0
+    if any(f" {w} " in q for w in ("per", "each", "except", "not", "without", "never", "breakdown", "difference", "ratio", "percentage", "percent")) or " by each " in q or any(f" top {n} " in q for n in "23456789"):
+        prior["unsupported"] = 30.0  # "total revenue per region" is a breakdown, not one aggregate
     if n_ent == 0:
         for k in ("lookup", "path", "compare", "boolean"):
             prior[k] *= 0.1

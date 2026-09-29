@@ -46,8 +46,16 @@ runs without keys. Its numbers are a floor, not a measurement of jev.
 backend = "typesafe"
 ```
 
-**LLM** (arms A and B, `auto` generation, the fallback path): fill in `examples/llm_adapter.py` or
-write your own factory, then:
+**LLM via OpenRouter** (arms A and B, `auto` generation, the fallback path): export
+`OPENROUTER_API_KEY`, then pass `--llm openrouter` (and optionally `--model some/model:free`) to
+`ask` or `eval`, or set `backend = "openrouter"` under `[llm]`. Responses are cached in
+`.kgqa/llm-cache.jsonl`, so reruns don't spend quota.
+
+```bash
+.venv/bin/kgqa eval --arms A,B,C --llm openrouter
+```
+
+**Any other LLM:** fill in `examples/llm_adapter.py` or write your own factory, then:
 
 ```toml
 [llm]

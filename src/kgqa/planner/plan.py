@@ -19,7 +19,11 @@ SHAPES: dict[str, str] = {
     "superlative": "Find the single entity with the highest or lowest value: most, least, highest, lowest, cheapest, most expensive, biggest, newest, oldest, top",
     "compare": "Compare two or more named entities on one value: which is more, greater, higher, cheaper, faster, than, or, versus",
     "boolean": "A yes/no question about whether a fact holds: is, does, did, was, are, has",
+    "unsupported": "Needs something none of the above can express: a breakdown per group (per region, by dealer, for each), "
+    "negation or exclusion (not, except, without, never), the top or bottom N with N more than one, "
+    "arithmetic between values (difference, ratio, percentage), or a combination of several of these",
 }
+UNSUPPORTED_SHAPE = "unsupported"
 ANCHOR_SHAPES = {"lookup", "path", "compare", "boolean"}
 
 OPS: dict[str, str] = {

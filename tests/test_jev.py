@@ -89,3 +89,22 @@ def test_typesafe_controller_wire_format():
 def test_choice_option_limit():
     with pytest.raises(ValueError):
         Choice(criteria={str(i): None for i in range(256)})
+
+
+def test_openrouter_backend_targets_openrouter(monkeypatch):
+    from kgqa.jev import make_controller
+
+    seen = {}
+
+    def handler(request):
+        seen["url"] = str(request.url)
+        seen["auth"] = request.headers["authorization"]
+        seen["model"] = json.loads(request.content)["model"]
+        return httpx2.Response(200, json={"model": "jev-1.13", "usage": {"input_tokens": 5}, "answers": {"n": {"type": "noul", "noul": 0.7}}, "id": "gen-1", "provider": "TypeSafe"})
+
+    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test")
+    real = httpx2.Client
+    monkeypatch.setattr(httpx2, "Client", lambda **kw: real(**{**kw, "transport": httpx2.MockTransport(handler)}))
+    ctrl = make_controller("openrouter")
+    assert ctrl.ask({"question": "q"}, {"n": Noul(instructions="?")}).noul("n").noul == 0.7  # OpenRouter's extra fields pass through
+    assert seen == {"url": "https://openrouter.ai/api/v1/systemone", "auth": "Bearer sk-or-test", "model": "jev-1.13"}

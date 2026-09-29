@@ -65,10 +65,11 @@ class FallbackPath:
         with self.queue.open("a") as f:
             f.write(json.dumps(row) + "\n")
 
-    def answer(self, question: str, link: LinkResult, reason: str) -> FallbackResult:
-        if isinstance(self.llm, NullLLM):
-            self.enqueue(question, f"{reason}; no LLM configured", link)
-            return FallbackResult("queued", error="no LLM configured")
+    def answer(self, question: str, link: LinkResult, reason: str, *, use_llm: bool = True) -> FallbackResult:
+        if isinstance(self.llm, NullLLM) or not use_llm:
+            why = "no LLM configured" if isinstance(self.llm, NullLLM) else "LLM unavailable"
+            self.enqueue(question, f"{reason}; {why}", link)
+            return FallbackResult("queued", error=why)
         classes = self.retrieve(question, link)
         big = Slicer(self.cat, self.slicer.px, token_budget=self.slicer.budget * 3, hops=1)
         sl = big.slice(classes)

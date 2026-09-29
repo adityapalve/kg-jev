@@ -40,11 +40,13 @@ class Slot:
     result: ChoiceResult | None = None
     tried: set[str] = field(default_factory=set)
 
+    none_text: str = "None of these options fits the question"
+
     def question(self) -> Choice:
         crit = dict(self.criteria)
         prior = dict(self.prior) if self.prior else None
         if self.allow_none:
-            crit[NONE] = "None of these options fits the question"
+            crit[NONE] = self.none_text
             if prior is not None:
                 prior[NONE] = 0.05
         return Choice(criteria=crit, instructions=self.instructions, prior=prior)
@@ -120,7 +122,13 @@ class Planner:
             bm = BM25([stems(uniq[k].lexical_text(self.cat)) for k in keys])
             ranked = sorted(range(len(keys)), key=lambda i: (-bm.score(stems(question), i), len(uniq[keys[i]].edges)))
             uniq = {keys[i]: uniq[keys[i]] for i in ranked[: self.max_options]}
-        criteria = {k: p.lexical_text(self.cat) for k, p in uniq.items()}
+        # Readable keys and sentence descriptions: jev reads these. Keys map back to paths here.
+        readable: dict[str, SchemaPath] = {}
+        for k, p in uniq.items():
+            label = p.label(self.cat)
+            readable[label if label not in readable else f"{label} [{k}]"] = p
+        uniq = readable
+        criteria = {k: p.explain(self.cat) for k, p in uniq.items()}
         base = _length_prior(uniq)
         if prior:
             base = {k: base[k] * prior.get(k, 1.0) for k in base}
@@ -163,7 +171,9 @@ class Planner:
             if not paths:
                 ctx.unresolved.append(f"no schema path from {self.cat.label(target)} to {a.label}")
                 continue
-            ctx.slots[f"link_{i}"] = self._path_slot(f"link_{i}", q, paths, f'How is the {self.cat.label(target)} in the question related to "{a.label}"?')
+            slot = self._path_slot(f"link_{i}", q, paths, f'The question is about {self.cat.label(target)} records connected to "{a.label}". Which connection does it mean?')
+            slot.none_text = f'The question does not connect {self.cat.label(target)} records to "{a.label}" in any of these ways'
+            ctx.slots[f"link_{i}"] = slot
             ctx.fixed[f"link_{i}"] = a
         for j, lit in enumerate(ctx.literals):
             paths = self._literal_paths(target, lit)

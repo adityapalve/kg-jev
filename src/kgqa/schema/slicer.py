@@ -108,7 +108,9 @@ class Slicer:
                 for j in p.joins_with:
                     if j not in props:
                         props.append(j)
-        header = ["# Graphs (use GRAPH <iri> { ... } for each module's triples)"]
+        used = sorted({pfx for line in lines for pfx, ns in self.px.map.items() if f"{pfx}:" in line})
+        header = ["# Prefixes (declare these in the query before using them)"] + [f"PREFIX {pfx}: <{self.px.map[pfx]}>" for pfx in used]
+        header += ["# Graphs (use GRAPH <iri> { ... } for each module's triples)"]
         for m in modules:
             mc = self.cat.modules[m]
             header.append(f"- {m}: <{mc.graph}> type predicate {self.px.compact(mc.type_predicate)} — {mc.description}")

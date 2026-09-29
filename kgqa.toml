@@ -13,13 +13,20 @@ catalog = ".kgqa/schema.json"
 entity_index = ".kgqa/entities.json"
 
 [controller]
-backend = "heuristic"      # "heuristic" (offline stand-in) | "typesafe" (jev; needs TYPESAFE_API_KEY)
-# model = "jev-latest"
+backend = "heuristic"      # "heuristic" (offline stand-in) | "typesafe" (jev; TYPESAFE_API_KEY)
+                           # | "openrouter" (jev via OpenRouter; OPENROUTER_API_KEY)
+# model = "jev-1.13"       # default: jev-latest (typesafe), jev-1.13 (openrouter)
 # timeout = 10.0
 cache = ".kgqa/jev-cache.jsonl"
 
 [llm]
-backend = "none"           # "none" | "python:your_module:factory" (see kgqa/llm/__init__.py)
+backend = "none"           # "none" | "openrouter" | "python:your_module:factory" (see kgqa/llm/__init__.py)
+# For OpenRouter: export OPENROUTER_API_KEY, set backend = "openrouter", and optionally:
+# model = "qwen/qwen3.8-27b:free"
+# fallback_models = ["google/gemma-4-31b-it:free", "nvidia/nemotron-3-super-120b-a12b:free"]
+# max_tokens = 2000
+# timeout = 120             # wall-clock seconds per call, retries included
+# reasoning_effort = "low"  # for reasoning models; "" to leave the model's default
 
 [pipeline]
 generation = "auto"        # "template" | "llm" | "auto" (templates when they apply, else LLM)

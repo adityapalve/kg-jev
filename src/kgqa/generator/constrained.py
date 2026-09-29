@@ -60,6 +60,24 @@ def used_iris(sparql: str) -> set[str]:
     return iris
 
 
+def add_missing_prefixes(sparql: str, prefixes: Prefixes) -> str:
+    """Declare prefixes the query uses but forgot to declare, when the config knows them."""
+    declared = {p for p, _ in _PREFIX_DECL.findall(sparql)}
+    body = re.sub(r"<[^>]*>", "", re.sub(r'"(?:[^"\\]|\\.)*"', '""', _PREFIX_DECL.sub("", sparql)))
+    used = {p for p, _ in _PNAME.findall(body) if p}
+    missing = sorted(p for p in used - declared if p in prefixes.map)
+    return "".join(f"PREFIX {p}: <{prefixes.map[p]}>\n" for p in missing) + sparql if missing else sparql
+
+
+def _suggest(iri: str, allowed: set[str]) -> str:
+    """Closest allowed IRI by local name, e.g. a right name in the wrong namespace."""
+    from kgqa.rdf import local_name
+
+    name = local_name(iri).lower()
+    hits = [a for a in allowed if local_name(a).lower() == name]
+    return f" (did you mean <{hits[0]}>?)" if hits else ""
+
+
 def validate(sparql: str, allowed: set[str]) -> list[str]:
     errors = []
     head = re.sub(r"(?im)^\s*PREFIX[^\n]*\n", "", sparql).lstrip().upper()
@@ -70,7 +88,7 @@ def validate(sparql: str, allowed: set[str]) -> list[str]:
         errors.append(f"Syntax error: {syntax}")
     unknown = sorted(i for i in used_iris(sparql) if i not in allowed and not i.startswith(SAFE_NAMESPACES))
     if unknown:
-        errors.append("These IRIs are not in the schema slice or entity list: " + ", ".join(f"<{u}>" for u in unknown[:10]))
+        errors.append("These IRIs are not in the schema slice or entity list: " + ", ".join(f"<{u}>{_suggest(u, allowed)}" for u in unknown[:10]))
     return errors
 
 
@@ -89,6 +107,8 @@ def program_from_sparql(sparql: str, source: str) -> Program:
     var = "answer" if "answer" in aliases + plain else (aliases[0] if aliases else plain[0] if plain else "answer")
     if has_agg and not plain:
         return Program([QueryStep("answer", sparql, "select", var, purpose="LLM query")], post="scalar", answer_var=var, source=source)
+    if len(set(plain + aliases)) > 1:  # e.g. ?region (SUM(?rev) AS ?answer): keep every column
+        return Program([QueryStep("answer", sparql, "select", var, purpose="LLM query")], post="table", answer_var=var, source=source)
     return Program([QueryStep("answer", sparql, "select", var, purpose="LLM query")], post="column", answer_var=var, source=source)
 
 
@@ -126,7 +146,7 @@ class ConstrainedLLMGenerator:
                 raise
             except Exception as e:  # provider errors degrade to fallback / review queue, not a crash
                 raise GenerationError(f"LLM call failed: {type(e).__name__}: {e}") from e
-            sparql = extract_sparql(text)
+            sparql = add_missing_prefixes(extract_sparql(text), self.px)
             errors = validate(sparql, allowed)
             if not errors:
                 return program_from_sparql(sparql, source)

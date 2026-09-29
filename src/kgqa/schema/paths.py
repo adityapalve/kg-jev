@@ -97,6 +97,46 @@ class SchemaPath:
                 parts.append(f"{label}" + (f" → {cat.label(e.dst)}" if e.dst else ""))
         return f"{cat.label(self.edges[0].src)}: " + " / ".join(parts)
 
+    def label(self, cat: SchemaCatalog) -> str:
+        """Short readable option key, e.g. "engine → horsepower" or "sold vehicle model (matched on model code)"."""
+        parts = []
+        for e in self.edges:
+            p = cat.properties.get(e.prop)
+            name = p.label if p else local_name(e.prop)
+            if e.kind == "inverse":
+                parts.append(f"{cat.label(e.dst or '')} whose {name} it is")
+            elif e.kind == "join":
+                other = cat.properties.get(e.steps[-1].prop)
+                parts.append(f"{cat.label(e.dst or '')} with matching {other.label if other else 'identifier'}")
+            else:
+                parts.append(name)
+        return " → ".join(parts)
+
+    def explain(self, cat: SchemaCatalog) -> str:
+        """A plain-language description of what this path reaches, for the controller to read."""
+        src = cat.label(self.edges[0].src)
+        clauses = []
+        for e in self.edges:
+            p = cat.properties.get(e.prop)
+            name = p.label if p else local_name(e.prop)
+            if e.kind == "inverse":
+                clauses.append(f"the {cat.label(e.dst or '')} whose {name} it is")
+            elif e.kind == "join":
+                other = cat.properties.get(e.steps[-1].prop)
+                clauses.append(f"the {cat.label(e.dst or '')} whose {other.label if other else 'identifier'} equals its {name} (a link across the {' and '.join(self.modules)} graphs)")
+            elif e.kind == "attribute":
+                clauses.append(f"its {name} ({_a(local_name(e.datatype or 'value'))} value)")
+            else:
+                clauses.append(f"its {name}, {_a(cat.label(e.dst or ''))}")
+        text = f"From {_a(src)}, follow " + ", then ".join(clauses) + "."
+        details = []
+        for e in self.edges:
+            p = cat.properties.get(e.prop)
+            if p and p.description:
+                alts = f" Also called: {', '.join(p.alt_labels)}." if p.alt_labels else ""
+                details.append(f"{p.label[:1].upper()}{p.label[1:]}: {p.description}{alts}")
+        return " ".join([text, *details])
+
     def lexical_text(self, cat: SchemaCatalog) -> str:
         """Text used for shortlisting and by the offline controller: labels, aliases, descriptions."""
         bits = [self.describe(cat)]
@@ -109,6 +149,10 @@ class SchemaPath:
                 c = cat.classes[e.dst]
                 bits += [c.label, *c.alt_labels]
         return " ".join(dict.fromkeys(b for b in bits if b))
+
+
+def _a(noun: str) -> str:
+    return f"{'an' if noun[:1].lower() in 'aeiou' else 'a'} {noun}"
 
 
 class SchemaGraph:

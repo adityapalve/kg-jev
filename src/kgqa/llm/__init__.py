@@ -19,10 +19,14 @@ No provider is wired in. To hook one up, write a factory and point the config at
 
 from __future__ import annotations
 
+import hashlib
 import importlib
+import json
+import threading
 import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
 from kgqa.trace import LLMLog, current_trace
@@ -74,6 +78,36 @@ class ScriptedLLM:
         return LLMResponse(self._queue.pop(0))
 
 
+class CachingLLM:
+    """Replays identical (model, system, prompt) calls from a JSONL file, saving free-tier quota."""
+
+    def __init__(self, inner: LLMClient, path: str | Path) -> None:
+        self.inner = inner
+        self.name = inner.name
+        self.path = Path(path)
+        self._lock = threading.Lock()
+        self._cache: dict[str, dict[str, Any]] = {}
+        if self.path.exists():
+            for line in self.path.read_text().splitlines():
+                if line.strip():
+                    row = json.loads(line)
+                    self._cache[row["key"]] = row
+
+    def complete(self, system: str, prompt: str) -> LLMResponse:
+        key = hashlib.sha256(json.dumps([self.inner.name, system, prompt]).encode()).hexdigest()
+        hit = self._cache.get(key)
+        if hit is not None:
+            return LLMResponse(hit["text"])  # zero tokens: a cached call costs nothing
+        resp = self.inner.complete(system, prompt)
+        row = {"key": key, "text": resp.text}
+        with self._lock:
+            self._cache[key] = row
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            with self.path.open("a") as f:
+                f.write(json.dumps(row) + "\n")
+        return resp
+
+
 def complete_traced(llm: LLMClient, system: str, prompt: str) -> LLMResponse:
     start = time.perf_counter()
     resp = llm.complete(system, prompt)
@@ -94,7 +128,11 @@ def complete_traced(llm: LLMClient, system: str, prompt: str) -> LLMResponse:
 def make_llm(backend: str = "none", **kwargs: Any) -> LLMClient:
     if backend in ("", "none"):
         return NullLLM()
+    if backend == "openrouter":
+        from kgqa.llm.openrouter import OpenRouterLLM
+
+        return OpenRouterLLM(**kwargs)
     if backend.startswith("python:"):
         _, module, attr = backend.split(":", 2)
         return getattr(importlib.import_module(module), attr)(**kwargs)
-    raise ValueError(f"Unknown LLM backend {backend!r}; use 'none' or 'python:module:factory'")
+    raise ValueError(f"Unknown LLM backend {backend!r}; use 'none', 'openrouter' or 'python:module:factory'")

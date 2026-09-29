@@ -26,8 +26,12 @@ class LiteralMention:
         if self.kind == "string":
             return f'{self.text} = "{self.value}"'
         if self.kind == "date_range":
-            return f"{self.text} = {self.low.isoformat()}..{self.high.isoformat()}"
-        return f"{self.text} = {self.value}"
+            return f"{self.text} = the period {self.low.isoformat()} to {self.high.isoformat()}"
+        if self.kind == "year":
+            return f"{self.text} = the year {self.value}"
+        if self.kind == "date":
+            return f"{self.text} = the date {self.value.isoformat()}"
+        return f"{self.text} = the number {self.value}"
 
 
 def _quarter(year: int, q: int) -> tuple[dt.date, dt.date]:

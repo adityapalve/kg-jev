@@ -153,6 +153,8 @@ class Executor:
                 res.values = [] if v is None else [v]
             if not res.values or res.values == [0]:
                 res.empty_at = res.empty_at or program.steps[-1].name
+        elif post == "table":  # one tuple per row, in the query's column order
+            res.values = [tuple(r.get(v) for v in last.variables) for r in last.rows]
         elif post == "extreme":
             rows = [r for r in last.rows if r.get(program.measure_var) is not None]
             if rows:

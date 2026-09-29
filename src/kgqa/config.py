@@ -59,6 +59,7 @@ class Config:
     controller_cache: str | None = None
     llm_backend: str = "none"
     llm_options: dict[str, Any] = field(default_factory=dict)
+    llm_cache: str | None = ".kgqa/llm-cache.jsonl"
     generation: str = "auto"  # template | llm | auto
     beam_width: int = 2
     beam_min_prob: float = 0.15
@@ -108,7 +109,8 @@ def load_config(path: str | Path = "kgqa.toml") -> Config:
         controller_timeout=ctrl.get("timeout"),
         controller_cache=ctrl.get("cache"),
         llm_backend=llm.get("backend", "none"),
-        llm_options={k: v for k, v in llm.items() if k != "backend"},
+        llm_options={k: v for k, v in llm.items() if k not in ("backend", "cache")},
+        llm_cache=llm.get("cache", ".kgqa/llm-cache.jsonl"),
         generation=pipe.get("generation", "auto"),
         beam_width=pipe.get("beam_width", 2),
         beam_min_prob=pipe.get("beam_min_prob", 0.15),

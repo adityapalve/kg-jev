@@ -15,14 +15,21 @@ from kgqa.fallback import FallbackPath
 from kgqa.generator import ConstrainedLLMGenerator, GenerationError, TemplateError, TemplateGenerator
 from kgqa.jev import RecordingController, make_controller
 from kgqa.linking import EntityIndex, EntityLinker, LinkResult
-from kgqa.llm import LLMClient, LLMNotConfigured, NullLLM, make_llm
+from kgqa.llm import CachingLLM, LLMClient, LLMNotConfigured, NullLLM, make_llm
 from kgqa.planner import Planner, QueryPlan
+from kgqa.planner.plan import UNSUPPORTED_SHAPE
 from kgqa.rdf import IRI, Prefixes, local_name
 from kgqa.router import Router
 from kgqa.schema import SchemaCatalog, Slicer
 from kgqa.store import Store
 from kgqa.trace import Trace, tracing
 from kgqa.verifier import Verifier
+
+
+def _jsonable(v: Any) -> Any:
+    if isinstance(v, tuple):
+        return [_jsonable(x) for x in v]
+    return v if isinstance(v, (int, float, bool)) or v is None else str(v)
 
 
 @dataclass
@@ -58,7 +65,7 @@ class Answer:
         return {
             "question": self.question,
             "status": self.status,
-            "values": [str(v) if not isinstance(v, (int, float, bool)) else v for v in self.values],
+            "values": [_jsonable(v) for v in self.values],
             "labels": self.labels,
             "shape": self.shape,
             "route": self.route,
@@ -97,11 +104,17 @@ class Pipeline:
         store = store or open_store(cfg)
         catalog, index = load_or_build(cfg, store)
         controller = controller or make_controller(cfg.controller_backend, model=cfg.controller_model, timeout=cfg.controller_timeout, cache=str(cfg.path(cfg.controller_cache)) if cfg.controller_cache else None)
-        llm = llm or make_llm(cfg.llm_backend, **cfg.llm_options)
+        if llm is None:
+            llm = make_llm(cfg.llm_backend, **cfg.llm_options)
+            if cfg.llm_cache and not isinstance(llm, NullLLM):
+                llm = CachingLLM(llm, cfg.path(cfg.llm_cache))
         return cls(cfg, store, catalog, index, controller, llm)
 
     # ------------------------------------------------------------------ helpers
     def label(self, v: Any) -> str:
+        if isinstance(v, tuple):  # a table row: "Mountain West: 5,320,393.37"
+            parts = [self.label(x) for x in v]
+            return f"{parts[0]}: {', '.join(parts[1:])}" if len(parts) > 1 else parts[0] if parts else ""
         if isinstance(v, IRI):
             rec = self.index.records.get(v)
             return rec.label if rec else self.cat.label(v) if (v in self.cat.classes or v in self.cat.properties) else local_name(v)
@@ -161,8 +174,10 @@ class Pipeline:
 
     def _fallback(self, question: str, link: LinkResult, reason: str, trace: Trace, shape: str | None = None, *, baseline: bool = False) -> Answer:
         trace.event("fallback", reason=reason)
+        # if the LLM itself just failed (outage, rate limit, timeout), asking it again only doubles the wait
+        llm_down = "LLM call failed" in reason
         with trace.stage("fallback"):
-            fr = self.fallback.answer(question, link, reason)
+            fr = self.fallback.answer(question, link, reason, use_llm=not llm_down)
         if fr.status == "answered":
             status = "answered" if baseline else "fallback"
             return self._answer(question, status, trace, link=link, res=fr.result, program=fr.program, shape=shape, source="fallback", reason=reason)
@@ -179,6 +194,8 @@ class Pipeline:
                 rr = self.router.route(question, link)
             if rr.fallback_reason:
                 return self._fallback(question, link, rr.fallback_reason, trace, rr.shape.choice)
+            if rr.shape.choice == UNSUPPORTED_SHAPE:
+                return self._direct_llm(question, link, rr, trace)
             routes = rr.routes if self.cfg.tie_policy == "try_next" else rr.routes[:1]
             last_reason = "no route produced an answer"
             for ri, route in enumerate(routes):
@@ -222,6 +239,42 @@ class Pipeline:
                 else:
                     last_reason = f"repairs exhausted ({self.cfg.limits.max_repairs})"
             return self._fallback(question, link, last_reason, trace, rr.shape.choice)
+
+    def _direct_llm(self, question: str, link: LinkResult, rr: Any, trace: Trace) -> Answer:
+        """No template can express this question: the LLM writes SPARQL over the routed schema slice.
+
+        The routing decisions still narrow the schema; no template plan is passed, since forcing the
+        question into a template shape is exactly what this path avoids.
+        """
+        trace.event("direct_llm", reason="shape needs LLM generation")
+        if isinstance(self.llm, NullLLM):
+            return self._fallback(question, link, "question needs LLM generation (no template shape fits)", trace, UNSUPPORTED_SHAPE)
+        focus = [r.klass for r in rr.routes if r.klass] + [t for m in link.mentions for t in m.types]
+        route = rr.routes[0] if rr.routes else None
+        feedback: list[str] = []
+        seen: set[str] = set()
+        for attempt in range(self.cfg.limits.max_repairs + 1):
+            with trace.stage("generate"):
+                sl = self.slicer.slice(focus or list(self.cat.classes)[:4])
+                try:
+                    program = self.llm_gen.generate(question, sl, link, None, feedback)
+                except (GenerationError, LLMNotConfigured) as e:
+                    return self._fallback(question, link, f"generation failed: {e}", trace, UNSUPPORTED_SHAPE)
+            key = " ".join(program.sparql()[-1].split())
+            if key in seen:  # the LLM repeated itself; another round will not change the verdict
+                trace.event("repair_stalled", attempt=attempt)
+                break
+            seen.add(key)
+            with trace.stage("execute"):
+                res = self.executor.run(program)
+            with trace.stage("verify"):
+                verdict = self.verifier.verify(question, None, program, res, self.label)
+            trace.event("verdict", route=0, attempt=attempt, action=verdict.action, reason=verdict.reason, source="llm")
+            if verdict.action == "accept":
+                conf = min([rr.shape.confidence, verdict.answers, *(m.confidence for m in link.mentions)])
+                return self._answer(question, "answered", trace, link=link, res=res, program=program, shape=UNSUPPORTED_SHAPE, route=route, source="llm", confidence=conf, reason=verdict.reason)
+            feedback = [f"Query:\n{program.sparql()[-1]}", f"Problem: {verdict.reason}. Result: {res.values[:5] or 'empty'}. Error: {res.error or 'none'}"]
+        return self._fallback(question, link, "LLM query did not verify", trace, UNSUPPORTED_SHAPE)
 
     def ask_baseline(self, question: str) -> Answer:
         """Arm A: entity linking + LLM with retrieved schema, one query, no controller routing."""

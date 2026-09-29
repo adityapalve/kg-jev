@@ -26,7 +26,7 @@ class QueryStep:
 class Program:
     steps: list[QueryStep]
     bindings: dict[str, list[Any]] = field(default_factory=dict)  # initial bindings (anchor IRIs)
-    post: str = "column"  # "column" | "scalar" | "ask" | "extreme" | "compare_max" | "compare_min"
+    post: str = "column"  # "column" | "scalar" | "ask" | "extreme" | "compare_max" | "compare_min" | "table"
     answer_var: str = "answer"
     measure_var: str = "m"
     source: str = "template"  # "template" | "llm" | "fallback"

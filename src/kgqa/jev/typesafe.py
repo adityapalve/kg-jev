@@ -22,6 +22,9 @@ from kgqa.jev.questions import (
 )
 
 
+OPENROUTER_BASE_URL = "https://openrouter.ai/api"
+
+
 def to_sdk_question(q: Question) -> Any:
     import typesafe_sdk as ts
 

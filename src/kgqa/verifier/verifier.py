@@ -63,7 +63,7 @@ class Verifier:
         self.limits = limits
 
     def _labels(self, values: list[Any], labeler) -> list[str]:
-        return [labeler(v) if isinstance(v, IRI) else str(v) for v in values[:10]]
+        return [labeler(v) for v in values[:10]]
 
     def _probe(self, plan: QueryPlan, program: Program, res: ExecResult, relax: Callable[[], int | None] | None) -> dict[str, Any]:
         """Evidence for why a result is empty."""

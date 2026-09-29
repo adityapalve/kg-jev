@@ -50,3 +50,10 @@ def test_catalog_round_trips(catalog, tmp_path):
     again = SchemaCatalog.load(tmp_path / "c.json")
     assert again.properties.keys() == catalog.properties.keys()
     assert again.joins == catalog.joins
+
+
+def test_paths_explain_themselves_in_plain_language(catalog):
+    g = SchemaGraph(catalog)
+    (join,) = [p for p in g.paths_between(O + "Order", O + "VehicleModel") if p.key() == "soldModelCode=modelCode"]
+    assert join.label(catalog) == "vehicle model with matching model code"
+    assert join.explain(catalog).startswith("From an order, follow the vehicle model whose model code equals its sold model code")

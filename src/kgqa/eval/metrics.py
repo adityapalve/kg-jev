@@ -12,6 +12,8 @@ from kgqa.rdf import IRI
 
 
 def norm_value(v: Any) -> Any:
+    if isinstance(v, tuple):
+        return ("row", tuple(norm_value(x) for x in v))
     if isinstance(v, IRI):
         return ("iri", str(v))
     if isinstance(v, bool):

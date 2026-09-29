@@ -5,10 +5,23 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sys
 from pathlib import Path
 
 from kgqa.config import load_config
+
+
+def load_dotenv(path: Path) -> None:
+    """Read KEY=value lines from a .env file into the environment (never overriding what is set)."""
+    if not path.is_file():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.removeprefix("export ").partition("=")
+        os.environ.setdefault(key.strip(), value.strip().strip("'\""))
 
 
 def _pipeline(args: argparse.Namespace):
@@ -17,6 +30,10 @@ def _pipeline(args: argparse.Namespace):
     cfg = load_config(args.config)
     if getattr(args, "controller", None):
         cfg.controller_backend = args.controller
+    if getattr(args, "llm", None):
+        cfg.llm_backend = args.llm
+    if getattr(args, "model", None):
+        cfg.llm_options["model"] = args.model
     return Pipeline.from_config(cfg)
 
 
@@ -128,6 +145,8 @@ def main(argv: list[str] | None = None) -> None:
     a.add_argument("question")
     a.add_argument("--generation", choices=["template", "llm", "auto"])
     a.add_argument("--controller", help="override [controller].backend")
+    a.add_argument("--llm", help="override [llm].backend, e.g. openrouter")
+    a.add_argument("--model", help="override [llm].model, e.g. qwen/qwen3.8-27b:free")
     a.add_argument("--trace", action="store_true")
     a.add_argument("--json", action="store_true")
     a.set_defaults(fn=cmd_ask)
@@ -136,6 +155,8 @@ def main(argv: list[str] | None = None) -> None:
     e.add_argument("--benchmark", default="data/sample/benchmark.json")
     e.add_argument("--arms", default="A,B,C")
     e.add_argument("--controller", help="override [controller].backend")
+    e.add_argument("--llm", help="override [llm].backend, e.g. openrouter")
+    e.add_argument("--model", help="override [llm].model, e.g. qwen/qwen3.8-27b:free")
     e.add_argument("--limit", type=int)
     e.add_argument("--out", default="reports/latest")
     e.set_defaults(fn=cmd_eval)
@@ -152,7 +173,9 @@ def main(argv: list[str] | None = None) -> None:
     f.set_defaults(fn=cmd_fetch)
 
     args = ap.parse_args(argv)
+    load_dotenv(Path(args.config).resolve().parent / ".env")  # API keys live here, gitignored
     logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
+    logging.getLogger("kgqa.llm").setLevel(logging.INFO)  # LLM calls are slow; always show progress
     args.fn(args)
 
 
