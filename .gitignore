@@ -1,0 +1,7 @@
+.venv/
+.kgqa/
+__pycache__/
+*.pyc
+.pytest_cache/
+reports/
+*.egg-info/

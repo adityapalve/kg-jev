@@ -1,0 +1,54 @@
+@prefix o: <http://example.org/onto#> .
+@prefix d: <http://example.org/id/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix kgqa: <https://kgqa.dev/ns#> .
+
+o:VehicleModelShape a sh:NodeShape ;
+    sh:targetClass o:VehicleModel ;
+    sh:property
+        [ sh:path o:manufacturer ; sh:class o:Manufacturer ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path o:modelCode ; sh:datatype xsd:string ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path o:launchYear ; sh:datatype xsd:integer ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path o:basePrice ; sh:datatype xsd:decimal ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path o:seats ; sh:datatype xsd:integer ; sh:minCount 0 ; sh:maxCount 1 ] ,
+        [ sh:path o:engine ; sh:class o:Engine ; sh:minCount 1 ] .
+
+o:EngineShape a sh:NodeShape ;
+    sh:targetClass o:Engine ;
+    sh:property
+        [ sh:path o:fuelType ; sh:class o:FuelType ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path o:horsepower ; sh:datatype xsd:integer ; sh:minCount 1 ; sh:maxCount 1 ] .
+
+o:ManufacturerShape a sh:NodeShape ;
+    sh:targetClass o:Manufacturer ;
+    sh:property
+        [ sh:path o:country ; sh:datatype xsd:string ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path o:foundedYear ; sh:datatype xsd:integer ; sh:minCount 0 ; sh:maxCount 1 ] .
+
+o:DealerShape a sh:NodeShape ;
+    sh:targetClass o:Dealer ;
+    sh:property
+        [ sh:path o:region ; sh:class o:Region ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path o:city ; sh:datatype xsd:string ; sh:minCount 1 ; sh:maxCount 1 ] .
+
+o:OrderShape a sh:NodeShape ;
+    sh:targetClass o:Order ;
+    sh:property
+        [ sh:path o:soldModelCode ; sh:datatype xsd:string ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path o:dealer ; sh:class o:Dealer ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path o:orderDate ; sh:datatype xsd:date ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path o:quantity ; sh:datatype xsd:integer ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path o:revenue ; sh:datatype xsd:decimal ; sh:minCount 1 ; sh:maxCount 1 ] .
+
+o:EmployeeShape a sh:NodeShape ;
+    sh:targetClass o:Employee ;
+    sh:property
+        [ sh:path o:worksAt ; sh:class o:Dealer ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path o:department ; sh:class o:Department ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path o:role ; sh:datatype xsd:string ; sh:minCount 1 ; sh:maxCount 1 ] ,
+        [ sh:path o:hireDate ; sh:datatype xsd:date ; sh:minCount 0 ; sh:maxCount 1 ] .

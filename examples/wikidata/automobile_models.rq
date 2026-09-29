@@ -1,0 +1,24 @@
+# Automobile models (Q3231690) with manufacturer, country and inception, plus English labels.
+# Also copies each property's label onto its wdt: IRI so schema cards get readable names.
+# UNTESTED against the live service; reduce LIMIT if it times out.
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+  ?m wdt:P31 wd:Q3231690 ; rdfs:label ?mLabel ; wdt:P176 ?maker ; wdt:P495 ?country ; wdt:P571 ?inception .
+  ?maker wdt:P31 wd:Q786820 ; rdfs:label ?makerLabel .
+  ?country wdt:P31 wd:Q6256 ; rdfs:label ?countryLabel .
+  wdt:P176 rdfs:label "manufacturer" . wdt:P495 rdfs:label "country of origin" . wdt:P571 rdfs:label "inception" .
+  wd:Q3231690 rdfs:label "automobile model" . wd:Q786820 rdfs:label "automobile manufacturer" . wd:Q6256 rdfs:label "country" .
+}
+WHERE {
+  {
+    SELECT ?m ?maker WHERE { ?m wdt:P31 wd:Q3231690 ; wdt:P176 ?maker . } LIMIT 5000
+  }
+  ?m rdfs:label ?mLabel . FILTER(LANG(?mLabel) = "en")
+  ?maker rdfs:label ?makerLabel . FILTER(LANG(?makerLabel) = "en")
+  OPTIONAL { ?m wdt:P495 ?country . ?country rdfs:label ?countryLabel . FILTER(LANG(?countryLabel) = "en") }
+  OPTIONAL { ?m wdt:P571 ?inception }
+}

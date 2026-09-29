@@ -1,0 +1,747 @@
+{
+ "name": "sample-automotive",
+ "graph": "data/sample",
+ "items": [
+  {
+   "id": "q01",
+   "question": "What is the base price of the Defender?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?v WHERE { GRAPH <http://example.org/graph/catalog> { <http://example.org/id/model/defender> o:basePrice ?v } }",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#SUV",
+    "shape": "lookup",
+    "properties": [
+     "http://example.org/onto#basePrice"
+    ],
+    "entities": [
+     "http://example.org/id/model/defender"
+    ]
+   },
+   "tags": [
+    "lookup"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q02",
+   "question": "Who makes the Mustang?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?v WHERE { GRAPH <http://example.org/graph/catalog> { <http://example.org/id/model/mustang> o:manufacturer ?v } }",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#Coupe",
+    "shape": "lookup",
+    "properties": [
+     "http://example.org/onto#manufacturer"
+    ],
+    "entities": [
+     "http://example.org/id/model/mustang"
+    ]
+   },
+   "tags": [
+    "lookup",
+    "ambiguous-entity"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q03",
+   "question": "When was the Toyota Prius launched?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?v WHERE { GRAPH <http://example.org/graph/catalog> { <http://example.org/id/model/prius> o:launchYear ?v } }",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#Hatchback",
+    "shape": "lookup",
+    "properties": [
+     "http://example.org/onto#launchYear"
+    ],
+    "entities": [
+     "http://example.org/id/model/prius"
+    ]
+   },
+   "tags": [
+    "lookup"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q04",
+   "question": "Which city is Harbor Vehicles located in?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?v WHERE { GRAPH <http://example.org/graph/sales> { <http://example.org/id/dealer/harbor> o:city ?v } }",
+   "gold": {
+    "module": "sales",
+    "class": "http://example.org/onto#Dealer",
+    "shape": "lookup",
+    "properties": [
+     "http://example.org/onto#city"
+    ],
+    "entities": [
+     "http://example.org/id/dealer/harbor"
+    ]
+   },
+   "tags": [
+    "lookup"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q05",
+   "question": "What is the horsepower of the Defender's engine?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?v WHERE { GRAPH <http://example.org/graph/catalog> { <http://example.org/id/model/defender> o:engine/o:horsepower ?v } }",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#SUV",
+    "shape": "path",
+    "properties": [
+     "http://example.org/onto#engine",
+     "http://example.org/onto#horsepower"
+    ],
+    "entities": [
+     "http://example.org/id/model/defender"
+    ]
+   },
+   "tags": [
+    "multi-hop"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q06",
+   "question": "Which region is the dealer that employs Alice Moreno in?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?v WHERE { GRAPH <http://example.org/graph/people> { <http://example.org/id/employee/amoreno> o:worksAt ?d } GRAPH <http://example.org/graph/sales> { ?d o:region ?v } }",
+   "gold": {
+    "module": "people",
+    "class": "http://example.org/onto#Employee",
+    "shape": "path",
+    "properties": [
+     "http://example.org/onto#worksAt",
+     "http://example.org/onto#region"
+    ],
+    "entities": [
+     "http://example.org/id/employee/amoreno"
+    ]
+   },
+   "tags": [
+    "multi-hop",
+    "cross-graph"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q07",
+   "question": "What fuel type does the Jaguar I-Pace use?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?v WHERE { GRAPH <http://example.org/graph/catalog> { <http://example.org/id/model/ipace> o:engine/o:fuelType ?v } }",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#SUV",
+    "shape": "path",
+    "properties": [
+     "http://example.org/onto#engine",
+     "http://example.org/onto#fuelType"
+    ],
+    "entities": [
+     "http://example.org/id/model/ipace"
+    ]
+   },
+   "tags": [
+    "multi-hop"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q08",
+   "question": "How many SUVs are there?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT (COUNT(DISTINCT ?x) AS ?n) WHERE { GRAPH <http://example.org/graph/catalog> { ?x a o:SUV } }",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#SUV",
+    "shape": "count",
+    "properties": [],
+    "entities": []
+   },
+   "tags": [
+    "count",
+    "subclass"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q09",
+   "question": "How many vehicle models does Ford make?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT (COUNT(DISTINCT ?x) AS ?n) WHERE { GRAPH <http://example.org/graph/catalog> { ?x o:manufacturer <http://example.org/id/mfr/ford> } }",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#VehicleModel",
+    "shape": "count",
+    "properties": [
+     "http://example.org/onto#manufacturer"
+    ],
+    "entities": [
+     "http://example.org/id/mfr/ford"
+    ]
+   },
+   "tags": [
+    "count"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q10",
+   "question": "How many orders did Mustang place in Q3 2025?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT (COUNT(DISTINCT ?x) AS ?n) WHERE { GRAPH <http://example.org/graph/sales> { ?x o:dealer <http://example.org/id/dealer/mustang> ; o:orderDate ?d FILTER(?d >= \"2025-07-01\"^^xsd:date && ?d <= \"2025-09-30\"^^xsd:date) } }",
+   "gold": {
+    "module": "sales",
+    "class": "http://example.org/onto#Order",
+    "shape": "count",
+    "properties": [
+     "http://example.org/onto#dealer",
+     "http://example.org/onto#orderDate"
+    ],
+    "entities": [
+     "http://example.org/id/dealer/mustang"
+    ]
+   },
+   "tags": [
+    "count",
+    "ambiguous-entity",
+    "date-range"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q11",
+   "question": "How many employees work at Downtown Motors?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT (COUNT(DISTINCT ?x) AS ?n) WHERE { GRAPH <http://example.org/graph/people> { ?x o:worksAt <http://example.org/id/dealer/downtown> } }",
+   "gold": {
+    "module": "people",
+    "class": "http://example.org/onto#Employee",
+    "shape": "count",
+    "properties": [
+     "http://example.org/onto#worksAt"
+    ],
+    "entities": [
+     "http://example.org/id/dealer/downtown"
+    ]
+   },
+   "tags": [
+    "count",
+    "cross-graph"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q12",
+   "question": "How many employees work in the Pacific region?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT (COUNT(DISTINCT ?x) AS ?n) WHERE { GRAPH <http://example.org/graph/people> { ?x o:worksAt ?d } GRAPH <http://example.org/graph/sales> { ?d o:region <http://example.org/id/region/pacific> } }",
+   "gold": {
+    "module": "people",
+    "class": "http://example.org/onto#Employee",
+    "shape": "count",
+    "properties": [
+     "http://example.org/onto#worksAt",
+     "http://example.org/onto#region"
+    ],
+    "entities": [
+     "http://example.org/id/region/pacific"
+    ]
+   },
+   "tags": [
+    "count",
+    "cross-graph",
+    "multi-hop"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q13",
+   "question": "How many Sales Managers are there?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT (COUNT(DISTINCT ?x) AS ?n) WHERE { GRAPH <http://example.org/graph/people> { ?x o:role \"Sales Manager\" } }",
+   "gold": {
+    "module": "people",
+    "class": "http://example.org/onto#Employee",
+    "shape": "count",
+    "properties": [
+     "http://example.org/onto#role"
+    ],
+    "entities": []
+   },
+   "tags": [
+    "count",
+    "value"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q14",
+   "question": "How many employees were hired after 2020?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT (COUNT(DISTINCT ?x) AS ?n) WHERE { GRAPH <http://example.org/graph/people> { ?x o:hireDate ?d FILTER(?d > \"2020-12-31\"^^xsd:date) } }",
+   "gold": {
+    "module": "people",
+    "class": "http://example.org/onto#Employee",
+    "shape": "count",
+    "properties": [
+     "http://example.org/onto#hireDate"
+    ],
+    "entities": []
+   },
+   "tags": [
+    "count",
+    "filter"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q15",
+   "question": "How many orders were placed in Q1 2019?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT (COUNT(DISTINCT ?x) AS ?n) WHERE { GRAPH <http://example.org/graph/sales> { ?x o:orderDate ?d FILTER(?d >= \"2019-01-01\"^^xsd:date && ?d <= \"2019-03-31\"^^xsd:date) } }",
+   "gold": {
+    "module": "sales",
+    "class": "http://example.org/onto#Order",
+    "shape": "count",
+    "properties": [
+     "http://example.org/onto#orderDate"
+    ],
+    "entities": []
+   },
+   "tags": [
+    "count",
+    "no-data"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q16",
+   "question": "Which models launched after 2019 cost more than $50,000?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?x WHERE { GRAPH <http://example.org/graph/catalog> { ?x o:launchYear ?y ; o:basePrice ?p FILTER(?y > 2019 && ?p > 50000) } }",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#VehicleModel",
+    "shape": "list",
+    "properties": [
+     "http://example.org/onto#launchYear",
+     "http://example.org/onto#basePrice"
+    ],
+    "entities": []
+   },
+   "tags": [
+    "list",
+    "filter"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q17",
+   "question": "Which dealers are in Denver?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?x WHERE { GRAPH <http://example.org/graph/sales> { ?x o:city \"Denver\" } }",
+   "gold": {
+    "module": "sales",
+    "class": "http://example.org/onto#Dealer",
+    "shape": "list",
+    "properties": [
+     "http://example.org/onto#city"
+    ],
+    "entities": []
+   },
+   "tags": [
+    "list",
+    "value"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q18",
+   "question": "Which manufacturers are based in the United Kingdom?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?x WHERE { GRAPH <http://example.org/graph/catalog> { ?x o:country \"United Kingdom\" } }",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#Manufacturer",
+    "shape": "list",
+    "properties": [
+     "http://example.org/onto#country"
+    ],
+    "entities": []
+   },
+   "tags": [
+    "list",
+    "value"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q19",
+   "question": "Which vehicle models are made by Toyota?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?x WHERE { GRAPH <http://example.org/graph/catalog> { ?x o:manufacturer <http://example.org/id/mfr/toyota> } }",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#VehicleModel",
+    "shape": "list",
+    "properties": [
+     "http://example.org/onto#manufacturer"
+    ],
+    "entities": [
+     "http://example.org/id/mfr/toyota"
+    ]
+   },
+   "tags": [
+    "list"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q20",
+   "question": "Which employees work at dealers in the Northeast region?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?x WHERE { GRAPH <http://example.org/graph/people> { ?x o:worksAt ?d } GRAPH <http://example.org/graph/sales> { ?d o:region <http://example.org/id/region/northeast> } }",
+   "gold": {
+    "module": "people",
+    "class": "http://example.org/onto#Employee",
+    "shape": "list",
+    "properties": [
+     "http://example.org/onto#worksAt",
+     "http://example.org/onto#region"
+    ],
+    "entities": [
+     "http://example.org/id/region/northeast"
+    ]
+   },
+   "tags": [
+    "list",
+    "cross-graph",
+    "multi-hop"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q21",
+   "question": "What is the average base price of electric vehicles?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT (AVG(?p) AS ?v) WHERE { GRAPH <http://example.org/graph/catalog> { ?x o:engine/o:fuelType <http://example.org/id/fuel/electric> ; o:basePrice ?p } }",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#VehicleModel",
+    "shape": "aggregate",
+    "properties": [
+     "http://example.org/onto#engine",
+     "http://example.org/onto#fuelType",
+     "http://example.org/onto#basePrice"
+    ],
+    "entities": [
+     "http://example.org/id/fuel/electric"
+    ]
+   },
+   "tags": [
+    "aggregate",
+    "multi-hop"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q22",
+   "question": "What was the total revenue from F-150 orders in 2025?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT (SUM(?r) AS ?v) WHERE { GRAPH <http://example.org/graph/catalog> { <http://example.org/id/model/f150> o:modelCode ?c } GRAPH <http://example.org/graph/sales> { ?x o:soldModelCode ?c ; o:revenue ?r ; o:orderDate ?d FILTER(YEAR(?d) = 2025) } }",
+   "gold": {
+    "module": "sales",
+    "class": "http://example.org/onto#Order",
+    "shape": "aggregate",
+    "properties": [
+     "http://example.org/onto#soldModelCode",
+     "http://example.org/onto#modelCode",
+     "http://example.org/onto#revenue",
+     "http://example.org/onto#orderDate"
+    ],
+    "entities": [
+     "http://example.org/id/model/f150"
+    ]
+   },
+   "tags": [
+    "aggregate",
+    "cross-graph",
+    "join"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q23",
+   "question": "What is the total quantity of vehicles ordered by Bayside Autos?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT (SUM(?q) AS ?v) WHERE { GRAPH <http://example.org/graph/sales> { ?x o:dealer <http://example.org/id/dealer/bayside> ; o:quantity ?q } }",
+   "gold": {
+    "module": "sales",
+    "class": "http://example.org/onto#Order",
+    "shape": "aggregate",
+    "properties": [
+     "http://example.org/onto#dealer",
+     "http://example.org/onto#quantity"
+    ],
+    "entities": [
+     "http://example.org/id/dealer/bayside"
+    ]
+   },
+   "tags": [
+    "aggregate"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q24",
+   "question": "What is the maximum horsepower of Land Rover models?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT (MAX(?h) AS ?v) WHERE { GRAPH <http://example.org/graph/catalog> { ?x o:manufacturer <http://example.org/id/mfr/landrover> ; o:engine/o:horsepower ?h } }",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#VehicleModel",
+    "shape": "aggregate",
+    "properties": [
+     "http://example.org/onto#manufacturer",
+     "http://example.org/onto#engine",
+     "http://example.org/onto#horsepower"
+    ],
+    "entities": [
+     "http://example.org/id/mfr/landrover"
+    ]
+   },
+   "tags": [
+    "aggregate",
+    "multi-hop"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q25",
+   "question": "What is the cheapest SUV?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?x WHERE { GRAPH <http://example.org/graph/catalog> { ?x a o:SUV ; o:basePrice ?p } } ORDER BY ?p LIMIT 1",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#SUV",
+    "shape": "superlative",
+    "properties": [
+     "http://example.org/onto#basePrice"
+    ],
+    "entities": []
+   },
+   "tags": [
+    "superlative"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q26",
+   "question": "Which manufacturer was founded first?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?x WHERE { GRAPH <http://example.org/graph/catalog> { ?x o:foundedYear ?y } } ORDER BY ?y LIMIT 1",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#Manufacturer",
+    "shape": "superlative",
+    "properties": [
+     "http://example.org/onto#foundedYear"
+    ],
+    "entities": []
+   },
+   "tags": [
+    "superlative"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q27",
+   "question": "What is the most powerful vehicle model?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?x WHERE { GRAPH <http://example.org/graph/catalog> { ?x o:engine/o:horsepower ?h } } ORDER BY DESC(?h) LIMIT 1",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#VehicleModel",
+    "shape": "superlative",
+    "properties": [
+     "http://example.org/onto#engine",
+     "http://example.org/onto#horsepower"
+    ],
+    "entities": []
+   },
+   "tags": [
+    "superlative",
+    "multi-hop"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q28",
+   "question": "Which is more expensive, the Defender or the Model Y?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?x WHERE { VALUES ?x { <http://example.org/id/model/defender> <http://example.org/id/model/modely> } GRAPH <http://example.org/graph/catalog> { ?x o:basePrice ?p } } ORDER BY DESC(?p) LIMIT 1",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#SUV",
+    "shape": "compare",
+    "properties": [
+     "http://example.org/onto#basePrice"
+    ],
+    "entities": [
+     "http://example.org/id/model/defender",
+     "http://example.org/id/model/modely"
+    ]
+   },
+   "tags": [
+    "compare"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q29",
+   "question": "Which has more horsepower, the Ford Mustang or the Jaguar F-Type?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?x WHERE { VALUES ?x { <http://example.org/id/model/mustang> <http://example.org/id/model/ftype> } GRAPH <http://example.org/graph/catalog> { ?x o:engine/o:horsepower ?h } } ORDER BY DESC(?h) LIMIT 1",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#Coupe",
+    "shape": "compare",
+    "properties": [
+     "http://example.org/onto#engine",
+     "http://example.org/onto#horsepower"
+    ],
+    "entities": [
+     "http://example.org/id/model/mustang",
+     "http://example.org/id/model/ftype"
+    ]
+   },
+   "tags": [
+    "compare",
+    "multi-hop"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q30",
+   "question": "Is the Model 3 made by Tesla?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nASK { GRAPH <http://example.org/graph/catalog> { <http://example.org/id/model/model3> o:manufacturer <http://example.org/id/mfr/tesla> } }",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#Sedan",
+    "shape": "boolean",
+    "properties": [
+     "http://example.org/onto#manufacturer"
+    ],
+    "entities": [
+     "http://example.org/id/model/model3",
+     "http://example.org/id/mfr/tesla"
+    ]
+   },
+   "tags": [
+    "boolean"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q31",
+   "question": "Is the Defender more expensive than 60000 dollars?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nASK { GRAPH <http://example.org/graph/catalog> { <http://example.org/id/model/defender> o:basePrice ?p FILTER(?p > 60000) } }",
+   "gold": {
+    "module": "catalog",
+    "class": "http://example.org/onto#SUV",
+    "shape": "boolean",
+    "properties": [
+     "http://example.org/onto#basePrice"
+    ],
+    "entities": [
+     "http://example.org/id/model/defender"
+    ]
+   },
+   "tags": [
+    "boolean",
+    "filter"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q32",
+   "question": "Does Alice Moreno work at Bayside Autos?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nASK { GRAPH <http://example.org/graph/people> { <http://example.org/id/employee/amoreno> o:worksAt <http://example.org/id/dealer/bayside> } }",
+   "gold": {
+    "module": "people",
+    "class": "http://example.org/onto#Employee",
+    "shape": "boolean",
+    "properties": [
+     "http://example.org/onto#worksAt"
+    ],
+    "entities": [
+     "http://example.org/id/employee/amoreno",
+     "http://example.org/id/dealer/bayside"
+    ]
+   },
+   "tags": [
+    "boolean",
+    "cross-graph"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q33",
+   "question": "Which dealer does Alice Moreno work at?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?v WHERE { GRAPH <http://example.org/graph/people> { <http://example.org/id/employee/amoreno> o:worksAt ?v } }",
+   "gold": {
+    "module": "people",
+    "class": "http://example.org/onto#Employee",
+    "shape": "lookup",
+    "properties": [
+     "http://example.org/onto#worksAt"
+    ],
+    "entities": [
+     "http://example.org/id/employee/amoreno"
+    ]
+   },
+   "tags": [
+    "lookup"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q34",
+   "question": "How many orders included the Tesla Model Y?",
+   "gold_sparql": "PREFIX o: <http://example.org/onto#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT (COUNT(DISTINCT ?x) AS ?n) WHERE { GRAPH <http://example.org/graph/catalog> { <http://example.org/id/model/modely> o:modelCode ?c } GRAPH <http://example.org/graph/sales> { ?x o:soldModelCode ?c } }",
+   "gold": {
+    "module": "sales",
+    "class": "http://example.org/onto#Order",
+    "shape": "count",
+    "properties": [
+     "http://example.org/onto#soldModelCode",
+     "http://example.org/onto#modelCode"
+    ],
+    "entities": [
+     "http://example.org/id/model/modely"
+    ]
+   },
+   "tags": [
+    "count",
+    "cross-graph",
+    "join"
+   ],
+   "expect_unanswered": false
+  },
+  {
+   "id": "q35",
+   "question": "What is the weather in Paris?",
+   "gold_sparql": null,
+   "gold": {
+    "module": null,
+    "class": null,
+    "shape": null,
+    "properties": [],
+    "entities": []
+   },
+   "tags": [
+    "out-of-scope"
+   ],
+   "expect_unanswered": true
+  },
+  {
+   "id": "q36",
+   "question": "Who is the CEO of Tesla?",
+   "gold_sparql": null,
+   "gold": {
+    "module": null,
+    "class": null,
+    "shape": null,
+    "properties": [],
+    "entities": [
+     "http://example.org/id/mfr/tesla"
+    ]
+   },
+   "tags": [
+    "out-of-scope",
+    "missing-property"
+   ],
+   "expect_unanswered": true
+  }
+ ]
+}

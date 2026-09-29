@@ -1,0 +1,313 @@
+@prefix o: <http://example.org/onto#> .
+@prefix d: <http://example.org/id/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix kgqa: <https://kgqa.dev/ns#> .
+
+
+# ---- catalog ----
+
+o:Manufacturer a owl:Class ;
+    rdfs:label "manufacturer" ;
+    rdfs:comment "A company that makes vehicles (car maker, brand)." ;
+    skos:altLabel "maker" ;
+    skos:altLabel "brand" ;
+    skos:altLabel "company" ;
+    skos:altLabel "automaker" .
+
+o:VehicleModel a owl:Class ;
+    rdfs:label "vehicle model" ;
+    rdfs:comment "A vehicle model offered in the product catalog." ;
+    skos:altLabel "model" ;
+    skos:altLabel "vehicle" ;
+    skos:altLabel "car" ;
+    skos:altLabel "product" .
+
+o:SUV a owl:Class ;
+    rdfs:label "SUV" ;
+    rdfs:comment "Sport utility vehicle model." ;
+    skos:altLabel "sport utility vehicle" ;
+    skos:altLabel "suvs" ;
+    rdfs:subClassOf o:VehicleModel .
+
+o:Sedan a owl:Class ;
+    rdfs:label "sedan" ;
+    rdfs:comment "Sedan (saloon) car model." ;
+    skos:altLabel "saloon" ;
+    rdfs:subClassOf o:VehicleModel .
+
+o:Coupe a owl:Class ;
+    rdfs:label "coupe" ;
+    rdfs:comment "Two-door coupe or sports car model." ;
+    skos:altLabel "sports car" ;
+    rdfs:subClassOf o:VehicleModel .
+
+o:Pickup a owl:Class ;
+    rdfs:label "pickup truck" ;
+    rdfs:comment "Pickup truck model." ;
+    skos:altLabel "truck" ;
+    skos:altLabel "pickup" ;
+    rdfs:subClassOf o:VehicleModel .
+
+o:Hatchback a owl:Class ;
+    rdfs:label "hatchback" ;
+    rdfs:comment "Hatchback car model." ;
+    rdfs:subClassOf o:VehicleModel .
+
+o:Engine a owl:Class ;
+    rdfs:label "engine" ;
+    rdfs:comment "A powertrain (combustion engine or electric motor) fitted to a vehicle model." ;
+    skos:altLabel "powertrain" ;
+    skos:altLabel "motor" .
+
+o:FuelType a owl:Class ;
+    rdfs:label "fuel type" ;
+    rdfs:comment "Kind of energy an engine uses: electric, petrol, diesel or hybrid." ;
+    skos:altLabel "fuel" ;
+    skos:altLabel "energy source" .
+
+o:manufacturer a owl:ObjectProperty ;
+    rdfs:label "manufacturer" ;
+    rdfs:comment "The company that makes the vehicle model." ;
+    skos:altLabel "made by" ;
+    skos:altLabel "maker" ;
+    skos:altLabel "built by" ;
+    skos:altLabel "brand" ;
+    skos:altLabel "makes" ;
+    skos:altLabel "manufactures" ;
+    skos:altLabel "produced by" ;
+    rdfs:domain o:VehicleModel ;
+    rdfs:range o:Manufacturer .
+
+o:modelCode a owl:DatatypeProperty ;
+    rdfs:label "model code" ;
+    rdfs:comment "Product identifier shared with the sales system." ;
+    skos:altLabel "product code" ;
+    skos:altLabel "sku" ;
+    rdfs:domain o:VehicleModel ;
+    rdfs:range xsd:string ;
+    kgqa:identifierScheme "model-code" .
+
+o:launchYear a owl:DatatypeProperty ;
+    rdfs:label "launch year" ;
+    rdfs:comment "Year the model was launched." ;
+    skos:altLabel "launched" ;
+    skos:altLabel "introduced" ;
+    skos:altLabel "release year" ;
+    skos:altLabel "came out" ;
+    rdfs:domain o:VehicleModel ;
+    rdfs:range xsd:integer .
+
+o:basePrice a owl:DatatypeProperty ;
+    rdfs:label "base price" ;
+    rdfs:comment "Base list price in US dollars." ;
+    skos:altLabel "price" ;
+    skos:altLabel "cost" ;
+    skos:altLabel "msrp" ;
+    skos:altLabel "expensive" ;
+    skos:altLabel "cheap" ;
+    skos:altLabel "costs" ;
+    rdfs:domain o:VehicleModel ;
+    rdfs:range xsd:decimal .
+
+o:seats a owl:DatatypeProperty ;
+    rdfs:label "seats" ;
+    rdfs:comment "Number of seats." ;
+    skos:altLabel "seating capacity" ;
+    skos:altLabel "passengers" ;
+    rdfs:domain o:VehicleModel ;
+    rdfs:range xsd:integer .
+
+o:engine a owl:ObjectProperty ;
+    rdfs:label "engine" ;
+    rdfs:comment "The engine or motor fitted to the model." ;
+    skos:altLabel "powertrain" ;
+    skos:altLabel "motor" ;
+    rdfs:domain o:VehicleModel ;
+    rdfs:range o:Engine .
+
+o:fuelType a owl:ObjectProperty ;
+    rdfs:label "fuel type" ;
+    rdfs:comment "Fuel or energy the engine uses." ;
+    skos:altLabel "fuel" ;
+    skos:altLabel "powered by" ;
+    skos:altLabel "runs on" ;
+    rdfs:domain o:Engine ;
+    rdfs:range o:FuelType .
+
+o:horsepower a owl:DatatypeProperty ;
+    rdfs:label "horsepower" ;
+    rdfs:comment "Peak power output in horsepower." ;
+    skos:altLabel "power" ;
+    skos:altLabel "hp" ;
+    skos:altLabel "powerful" ;
+    skos:altLabel "output" ;
+    rdfs:domain o:Engine ;
+    rdfs:range xsd:integer .
+
+o:country a owl:DatatypeProperty ;
+    rdfs:label "country" ;
+    rdfs:comment "Country where the manufacturer is headquartered." ;
+    skos:altLabel "headquarters" ;
+    skos:altLabel "based" ;
+    skos:altLabel "nationality" ;
+    rdfs:domain o:Manufacturer ;
+    rdfs:range xsd:string .
+
+o:foundedYear a owl:DatatypeProperty ;
+    rdfs:label "founded year" ;
+    rdfs:comment "Year the manufacturer was founded." ;
+    skos:altLabel "founded" ;
+    skos:altLabel "established" ;
+    rdfs:domain o:Manufacturer ;
+    rdfs:range xsd:integer .
+
+
+# ---- sales ----
+
+o:Dealer a owl:Class ;
+    rdfs:label "dealer" ;
+    rdfs:comment "A dealership that sells vehicles and places orders." ;
+    skos:altLabel "dealership" ;
+    skos:altLabel "retailer" ;
+    skos:altLabel "store" .
+
+o:Region a owl:Class ;
+    rdfs:label "sales region" ;
+    rdfs:comment "A geographic sales region grouping dealers." ;
+    skos:altLabel "region" ;
+    skos:altLabel "territory" ;
+    skos:altLabel "area" .
+
+o:Order a owl:Class ;
+    rdfs:label "order" ;
+    rdfs:comment "A vehicle sales order placed by a dealer." ;
+    skos:altLabel "sale" ;
+    skos:altLabel "sales" ;
+    skos:altLabel "purchase" ;
+    skos:altLabel "transaction" .
+
+o:soldModelCode a owl:DatatypeProperty ;
+    rdfs:label "sold model code" ;
+    rdfs:comment "Model code of the vehicle model sold in this order." ;
+    skos:altLabel "model sold" ;
+    skos:altLabel "vehicle sold" ;
+    skos:altLabel "sold" ;
+    rdfs:domain o:Order ;
+    rdfs:range xsd:string ;
+    kgqa:joinsWith o:modelCode .
+
+o:dealer a owl:ObjectProperty ;
+    rdfs:label "dealer" ;
+    rdfs:comment "Dealer that placed the order." ;
+    skos:altLabel "dealership" ;
+    skos:altLabel "sold by" ;
+    skos:altLabel "placed by" ;
+    rdfs:domain o:Order ;
+    rdfs:range o:Dealer .
+
+o:orderDate a owl:DatatypeProperty ;
+    rdfs:label "order date" ;
+    rdfs:comment "Date the order was placed." ;
+    skos:altLabel "date" ;
+    skos:altLabel "ordered" ;
+    skos:altLabel "when" ;
+    rdfs:domain o:Order ;
+    rdfs:range xsd:date .
+
+o:quantity a owl:DatatypeProperty ;
+    rdfs:label "quantity" ;
+    rdfs:comment "Number of vehicles in the order." ;
+    skos:altLabel "units" ;
+    skos:altLabel "vehicles sold" ;
+    skos:altLabel "number of vehicles" ;
+    skos:altLabel "volume" ;
+    rdfs:domain o:Order ;
+    rdfs:range xsd:integer .
+
+o:revenue a owl:DatatypeProperty ;
+    rdfs:label "revenue" ;
+    rdfs:comment "Order revenue in US dollars." ;
+    skos:altLabel "sales amount" ;
+    skos:altLabel "income" ;
+    skos:altLabel "earned" ;
+    skos:altLabel "turnover" ;
+    skos:altLabel "value" ;
+    rdfs:domain o:Order ;
+    rdfs:range xsd:decimal .
+
+o:region a owl:ObjectProperty ;
+    rdfs:label "region" ;
+    rdfs:comment "Sales region the dealer belongs to." ;
+    skos:altLabel "territory" ;
+    skos:altLabel "area" ;
+    skos:altLabel "located in" ;
+    rdfs:domain o:Dealer ;
+    rdfs:range o:Region .
+
+o:city a owl:DatatypeProperty ;
+    rdfs:label "city" ;
+    rdfs:comment "City where the dealer is located." ;
+    skos:altLabel "town" ;
+    skos:altLabel "location" ;
+    skos:altLabel "located" ;
+    rdfs:domain o:Dealer ;
+    rdfs:range xsd:string .
+
+
+# ---- people ----
+
+o:Employee a owl:Class ;
+    rdfs:label "employee" ;
+    rdfs:comment "A person employed at a dealer." ;
+    skos:altLabel "staff" ;
+    skos:altLabel "person" ;
+    skos:altLabel "worker" ;
+    skos:altLabel "people" .
+
+o:Department a owl:Class ;
+    rdfs:label "department" ;
+    rdfs:comment "Department an employee belongs to." ;
+    skos:altLabel "team" ;
+    skos:altLabel "division" .
+
+o:worksAt a owl:ObjectProperty ;
+    rdfs:label "works at" ;
+    rdfs:comment "Dealer where the employee works." ;
+    skos:altLabel "employer" ;
+    skos:altLabel "employed by" ;
+    skos:altLabel "employs" ;
+    skos:altLabel "works for" ;
+    skos:altLabel "staff of" ;
+    rdfs:domain o:Employee ;
+    rdfs:range o:Dealer .
+
+o:department a owl:ObjectProperty ;
+    rdfs:label "department" ;
+    rdfs:comment "Department of the employee." ;
+    skos:altLabel "team" ;
+    skos:altLabel "division" ;
+    rdfs:domain o:Employee ;
+    rdfs:range o:Department .
+
+o:role a owl:DatatypeProperty ;
+    rdfs:label "role" ;
+    rdfs:comment "Job title of the employee." ;
+    skos:altLabel "job title" ;
+    skos:altLabel "position" ;
+    skos:altLabel "job" ;
+    rdfs:domain o:Employee ;
+    rdfs:range xsd:string .
+
+o:hireDate a owl:DatatypeProperty ;
+    rdfs:label "hire date" ;
+    rdfs:comment "Date the employee was hired." ;
+    skos:altLabel "hired" ;
+    skos:altLabel "joined" ;
+    skos:altLabel "start date" ;
+    rdfs:domain o:Employee ;
+    rdfs:range xsd:date .

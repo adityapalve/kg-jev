@@ -1,0 +1,43 @@
+# Template for a Wikidata domain slice. UNTESTED against live endpoints: treat it as a starting point.
+#
+# 1. Materialize a slice (the public WDQS has a 60 s limit; keep CONSTRUCTs small, or use QLever):
+#      kgqa fetch --endpoint https://query.wikidata.org/sparql \
+#        --query examples/wikidata/automobile_models.rq --out data/wikidata/automobiles.nt
+# 2. kgqa --config examples/wikidata/kgqa.toml build
+# 3. kgqa --config examples/wikidata/kgqa.toml ask "Which company manufactures the Ford Mustang?"
+#
+# Known gaps for Wikidata (see docs/implementation-plan.md): property labels live on wd:P… entities
+# while triples use wdt:P…, so either CONSTRUCT rdfs:label triples onto the wdt: IRIs (the query
+# below does this) or write a small ontology file with labels. There is no SHACL; cards come from
+# statistics alone, which is one of the open questions the eval should answer.
+
+[store]
+kind = "oxigraph"
+path = "../../.kgqa/wikidata-store"
+# kind = "http"
+# endpoint = "http://localhost:7001"   # e.g. a local QLever instance
+
+[schema]
+ontology = []
+shapes = []
+catalog = "../../.kgqa/wikidata-schema.json"
+entity_index = "../../.kgqa/wikidata-entities.json"
+
+[controller]
+backend = "typesafe"
+cache = "../../.kgqa/wikidata-jev-cache.jsonl"
+
+[llm]
+backend = "none"
+
+[prefixes]
+wd = "http://www.wikidata.org/entity/"
+wdt = "http://www.wikidata.org/prop/direct/"
+
+[[modules]]
+name = "automobiles"
+graph = "https://kgqa.dev/graph/wikidata-automobiles"
+description = "Wikidata automobile models, their manufacturers, countries of origin and production dates"
+files = ["../../data/wikidata/automobiles.nt"]
+type_predicate = "http://www.wikidata.org/prop/direct/P31"
+label_predicates = ["http://www.w3.org/2000/01/rdf-schema#label", "http://www.w3.org/2004/02/skos/core#altLabel"]

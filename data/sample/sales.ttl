@@ -1,0 +1,387 @@
+@prefix o: <http://example.org/onto#> .
+@prefix d: <http://example.org/id/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix kgqa: <https://kgqa.dev/ns#> .
+
+<http://example.org/id/region/mountain> a o:Region ; rdfs:label "Mountain West" .
+<http://example.org/id/region/pacific> a o:Region ; rdfs:label "Pacific" .
+<http://example.org/id/region/northeast> a o:Region ; rdfs:label "Northeast" .
+<http://example.org/id/dealer/downtown> a o:Dealer ; rdfs:label "Downtown Motors" ;
+    skos:altLabel "Downtown dealer" ;
+    o:city "Denver" ; o:region <http://example.org/id/region/mountain> .
+<http://example.org/id/dealer/bayside> a o:Dealer ; rdfs:label "Bayside Autos" ;
+    o:city "San Francisco" ; o:region <http://example.org/id/region/pacific> .
+<http://example.org/id/dealer/harbor> a o:Dealer ; rdfs:label "Harbor Vehicles" ;
+    o:city "Seattle" ; o:region <http://example.org/id/region/pacific> .
+<http://example.org/id/dealer/liberty> a o:Dealer ; rdfs:label "Liberty Cars" ;
+    o:city "Boston" ; o:region <http://example.org/id/region/northeast> .
+<http://example.org/id/dealer/mustang> a o:Dealer ; rdfs:label "Mustang Auto Group" ;
+    skos:altLabel "Mustang" ;
+    o:city "Cheyenne" ; o:region <http://example.org/id/region/mountain> .
+<http://example.org/id/dealer/empire> a o:Dealer ; rdfs:label "Empire Motors" ;
+    o:city "New York" ; o:region <http://example.org/id/region/northeast> .
+<http://example.org/id/order/0001> a o:Order ; rdfs:label "Order 0001" ;
+    o:soldModelCode "EVQ-19" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2024-10-08"^^xsd:date ; o:quantity 2 ; o:revenue "90038.54"^^xsd:decimal .
+<http://example.org/id/order/0002> a o:Order ; rdfs:label "Order 0002" ;
+    o:soldModelCode "EVQ-19" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2025-07-12"^^xsd:date ; o:quantity 1 ; o:revenue "46400.25"^^xsd:decimal .
+<http://example.org/id/order/0003> a o:Order ; rdfs:label "Order 0003" ;
+    o:soldModelCode "DEF-20" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2024-04-05"^^xsd:date ; o:quantity 2 ; o:revenue "109090.14"^^xsd:decimal .
+<http://example.org/id/order/0004> a o:Order ; rdfs:label "Order 0004" ;
+    o:soldModelCode "COR-19" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2024-07-22"^^xsd:date ; o:quantity 5 ; o:revenue "107091.77"^^xsd:decimal .
+<http://example.org/id/order/0005> a o:Order ; rdfs:label "Order 0005" ;
+    o:soldModelCode "RAV-19" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2024-10-11"^^xsd:date ; o:quantity 1 ; o:revenue "29020.43"^^xsd:decimal .
+<http://example.org/id/order/0006> a o:Order ; rdfs:label "Order 0006" ;
+    o:soldModelCode "F15-21" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2025-03-08"^^xsd:date ; o:quantity 3 ; o:revenue "103920.81"^^xsd:decimal .
+<http://example.org/id/order/0007> a o:Order ; rdfs:label "Order 0007" ;
+    o:soldModelCode "FTP-13" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2024-04-14"^^xsd:date ; o:quantity 1 ; o:revenue "67927.59"^^xsd:decimal .
+<http://example.org/id/order/0008> a o:Order ; rdfs:label "Order 0008" ;
+    o:soldModelCode "MUS-15" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2025-09-10"^^xsd:date ; o:quantity 3 ; o:revenue "96438.75"^^xsd:decimal .
+<http://example.org/id/order/0009> a o:Order ; rdfs:label "Order 0009" ;
+    o:soldModelCode "RAV-19" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2024-05-07"^^xsd:date ; o:quantity 4 ; o:revenue "109771.27"^^xsd:decimal .
+<http://example.org/id/order/0010> a o:Order ; rdfs:label "Order 0010" ;
+    o:soldModelCode "TM3-17" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2025-09-25"^^xsd:date ; o:quantity 3 ; o:revenue "118342.58"^^xsd:decimal .
+<http://example.org/id/order/0011> a o:Order ; rdfs:label "Order 0011" ;
+    o:soldModelCode "DSC-17" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2025-11-08"^^xsd:date ; o:quantity 2 ; o:revenue "118217.77"^^xsd:decimal .
+<http://example.org/id/order/0012> a o:Order ; rdfs:label "Order 0012" ;
+    o:soldModelCode "DSC-17" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2024-04-13"^^xsd:date ; o:quantity 4 ; o:revenue "227088.14"^^xsd:decimal .
+<http://example.org/id/order/0013> a o:Order ; rdfs:label "Order 0013" ;
+    o:soldModelCode "MUS-15" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-01-14"^^xsd:date ; o:quantity 3 ; o:revenue "91849.01"^^xsd:decimal .
+<http://example.org/id/order/0014> a o:Order ; rdfs:label "Order 0014" ;
+    o:soldModelCode "F1L-22" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2025-11-30"^^xsd:date ; o:quantity 1 ; o:revenue "51413.98"^^xsd:decimal .
+<http://example.org/id/order/0015> a o:Order ; rdfs:label "Order 0015" ;
+    o:soldModelCode "F15-21" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2024-09-07"^^xsd:date ; o:quantity 2 ; o:revenue "70342.62"^^xsd:decimal .
+<http://example.org/id/order/0016> a o:Order ; rdfs:label "Order 0016" ;
+    o:soldModelCode "F1L-22" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2025-12-05"^^xsd:date ; o:quantity 5 ; o:revenue "248968.00"^^xsd:decimal .
+<http://example.org/id/order/0017> a o:Order ; rdfs:label "Order 0017" ;
+    o:soldModelCode "TMY-20" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2024-08-22"^^xsd:date ; o:quantity 1 ; o:revenue "45198.16"^^xsd:decimal .
+<http://example.org/id/order/0018> a o:Order ; rdfs:label "Order 0018" ;
+    o:soldModelCode "PRI-16" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2024-03-08"^^xsd:date ; o:quantity 2 ; o:revenue "56730.85"^^xsd:decimal .
+<http://example.org/id/order/0019> a o:Order ; rdfs:label "Order 0019" ;
+    o:soldModelCode "TMY-20" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-11-02"^^xsd:date ; o:quantity 4 ; o:revenue "174897.10"^^xsd:decimal .
+<http://example.org/id/order/0020> a o:Order ; rdfs:label "Order 0020" ;
+    o:soldModelCode "RAV-19" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2024-09-28"^^xsd:date ; o:quantity 2 ; o:revenue "55664.35"^^xsd:decimal .
+<http://example.org/id/order/0021> a o:Order ; rdfs:label "Order 0021" ;
+    o:soldModelCode "F1L-22" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2025-08-21"^^xsd:date ; o:quantity 4 ; o:revenue "210459.77"^^xsd:decimal .
+<http://example.org/id/order/0022> a o:Order ; rdfs:label "Order 0022" ;
+    o:soldModelCode "PRI-16" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2024-08-12"^^xsd:date ; o:quantity 2 ; o:revenue "54922.68"^^xsd:decimal .
+<http://example.org/id/order/0023> a o:Order ; rdfs:label "Order 0023" ;
+    o:soldModelCode "DSC-17" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2024-04-22"^^xsd:date ; o:quantity 2 ; o:revenue "116843.09"^^xsd:decimal .
+<http://example.org/id/order/0024> a o:Order ; rdfs:label "Order 0024" ;
+    o:soldModelCode "RNG-19" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2024-03-06"^^xsd:date ; o:quantity 4 ; o:revenue "108699.31"^^xsd:decimal .
+<http://example.org/id/order/0025> a o:Order ; rdfs:label "Order 0025" ;
+    o:soldModelCode "RAV-19" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2024-09-14"^^xsd:date ; o:quantity 5 ; o:revenue "146285.04"^^xsd:decimal .
+<http://example.org/id/order/0026> a o:Order ; rdfs:label "Order 0026" ;
+    o:soldModelCode "COR-19" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2024-04-27"^^xsd:date ; o:quantity 5 ; o:revenue "110007.72"^^xsd:decimal .
+<http://example.org/id/order/0027> a o:Order ; rdfs:label "Order 0027" ;
+    o:soldModelCode "TMY-20" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2024-10-27"^^xsd:date ; o:quantity 4 ; o:revenue "171477.47"^^xsd:decimal .
+<http://example.org/id/order/0028> a o:Order ; rdfs:label "Order 0028" ;
+    o:soldModelCode "COR-19" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2024-09-26"^^xsd:date ; o:quantity 5 ; o:revenue "110105.27"^^xsd:decimal .
+<http://example.org/id/order/0029> a o:Order ; rdfs:label "Order 0029" ;
+    o:soldModelCode "EVQ-19" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2024-11-01"^^xsd:date ; o:quantity 5 ; o:revenue "232348.64"^^xsd:decimal .
+<http://example.org/id/order/0030> a o:Order ; rdfs:label "Order 0030" ;
+    o:soldModelCode "EX3-24" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2024-06-14"^^xsd:date ; o:quantity 5 ; o:revenue "177849.00"^^xsd:decimal .
+<http://example.org/id/order/0031> a o:Order ; rdfs:label "Order 0031" ;
+    o:soldModelCode "COR-19" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2024-11-27"^^xsd:date ; o:quantity 4 ; o:revenue "82857.12"^^xsd:decimal .
+<http://example.org/id/order/0032> a o:Order ; rdfs:label "Order 0032" ;
+    o:soldModelCode "MUS-15" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2024-09-02"^^xsd:date ; o:quantity 1 ; o:revenue "30696.63"^^xsd:decimal .
+<http://example.org/id/order/0033> a o:Order ; rdfs:label "Order 0033" ;
+    o:soldModelCode "DSC-17" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2025-05-12"^^xsd:date ; o:quantity 1 ; o:revenue "60076.09"^^xsd:decimal .
+<http://example.org/id/order/0034> a o:Order ; rdfs:label "Order 0034" ;
+    o:soldModelCode "EX3-24" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-11-06"^^xsd:date ; o:quantity 4 ; o:revenue "142204.71"^^xsd:decimal .
+<http://example.org/id/order/0035> a o:Order ; rdfs:label "Order 0035" ;
+    o:soldModelCode "F15-21" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2025-06-24"^^xsd:date ; o:quantity 5 ; o:revenue "175293.19"^^xsd:decimal .
+<http://example.org/id/order/0036> a o:Order ; rdfs:label "Order 0036" ;
+    o:soldModelCode "FTP-13" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2025-12-07"^^xsd:date ; o:quantity 2 ; o:revenue "139585.03"^^xsd:decimal .
+<http://example.org/id/order/0037> a o:Order ; rdfs:label "Order 0037" ;
+    o:soldModelCode "PRI-16" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2025-10-27"^^xsd:date ; o:quantity 3 ; o:revenue "81904.03"^^xsd:decimal .
+<http://example.org/id/order/0038> a o:Order ; rdfs:label "Order 0038" ;
+    o:soldModelCode "RAV-19" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2024-09-10"^^xsd:date ; o:quantity 2 ; o:revenue "54817.08"^^xsd:decimal .
+<http://example.org/id/order/0039> a o:Order ; rdfs:label "Order 0039" ;
+    o:soldModelCode "COR-19" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2025-07-21"^^xsd:date ; o:quantity 2 ; o:revenue "43431.31"^^xsd:decimal .
+<http://example.org/id/order/0040> a o:Order ; rdfs:label "Order 0040" ;
+    o:soldModelCode "COR-19" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2025-12-25"^^xsd:date ; o:quantity 1 ; o:revenue "21082.94"^^xsd:decimal .
+<http://example.org/id/order/0041> a o:Order ; rdfs:label "Order 0041" ;
+    o:soldModelCode "DEF-20" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2024-03-13"^^xsd:date ; o:quantity 5 ; o:revenue "272846.99"^^xsd:decimal .
+<http://example.org/id/order/0042> a o:Order ; rdfs:label "Order 0042" ;
+    o:soldModelCode "XC9-15" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-07-06"^^xsd:date ; o:quantity 2 ; o:revenue "113756.98"^^xsd:decimal .
+<http://example.org/id/order/0043> a o:Order ; rdfs:label "Order 0043" ;
+    o:soldModelCode "XC9-15" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-04-29"^^xsd:date ; o:quantity 4 ; o:revenue "217793.08"^^xsd:decimal .
+<http://example.org/id/order/0044> a o:Order ; rdfs:label "Order 0044" ;
+    o:soldModelCode "EVQ-19" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2025-03-17"^^xsd:date ; o:quantity 3 ; o:revenue "137317.97"^^xsd:decimal .
+<http://example.org/id/order/0045> a o:Order ; rdfs:label "Order 0045" ;
+    o:soldModelCode "RAV-19" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2024-02-25"^^xsd:date ; o:quantity 1 ; o:revenue "27400.62"^^xsd:decimal .
+<http://example.org/id/order/0046> a o:Order ; rdfs:label "Order 0046" ;
+    o:soldModelCode "TMY-20" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2024-09-11"^^xsd:date ; o:quantity 2 ; o:revenue "85969.50"^^xsd:decimal .
+<http://example.org/id/order/0047> a o:Order ; rdfs:label "Order 0047" ;
+    o:soldModelCode "RAV-19" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-03-08"^^xsd:date ; o:quantity 2 ; o:revenue "55812.45"^^xsd:decimal .
+<http://example.org/id/order/0048> a o:Order ; rdfs:label "Order 0048" ;
+    o:soldModelCode "IPC-18" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2025-03-29"^^xsd:date ; o:quantity 5 ; o:revenue "341219.77"^^xsd:decimal .
+<http://example.org/id/order/0049> a o:Order ; rdfs:label "Order 0049" ;
+    o:soldModelCode "COR-19" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2024-08-30"^^xsd:date ; o:quantity 2 ; o:revenue "42790.58"^^xsd:decimal .
+<http://example.org/id/order/0050> a o:Order ; rdfs:label "Order 0050" ;
+    o:soldModelCode "XC9-15" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-02-14"^^xsd:date ; o:quantity 1 ; o:revenue "54330.75"^^xsd:decimal .
+<http://example.org/id/order/0051> a o:Order ; rdfs:label "Order 0051" ;
+    o:soldModelCode "COR-19" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2024-09-28"^^xsd:date ; o:quantity 4 ; o:revenue "84728.15"^^xsd:decimal .
+<http://example.org/id/order/0052> a o:Order ; rdfs:label "Order 0052" ;
+    o:soldModelCode "XC9-15" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2024-07-13"^^xsd:date ; o:quantity 3 ; o:revenue "163718.15"^^xsd:decimal .
+<http://example.org/id/order/0053> a o:Order ; rdfs:label "Order 0053" ;
+    o:soldModelCode "DEF-20" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2025-07-09"^^xsd:date ; o:quantity 1 ; o:revenue "56890.78"^^xsd:decimal .
+<http://example.org/id/order/0054> a o:Order ; rdfs:label "Order 0054" ;
+    o:soldModelCode "DEF-20" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2025-08-21"^^xsd:date ; o:quantity 4 ; o:revenue "223099.90"^^xsd:decimal .
+<http://example.org/id/order/0055> a o:Order ; rdfs:label "Order 0055" ;
+    o:soldModelCode "F15-21" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2025-06-04"^^xsd:date ; o:quantity 1 ; o:revenue "36291.87"^^xsd:decimal .
+<http://example.org/id/order/0056> a o:Order ; rdfs:label "Order 0056" ;
+    o:soldModelCode "DSC-17" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2024-03-10"^^xsd:date ; o:quantity 2 ; o:revenue "114731.64"^^xsd:decimal .
+<http://example.org/id/order/0057> a o:Order ; rdfs:label "Order 0057" ;
+    o:soldModelCode "IPC-18" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2025-08-31"^^xsd:date ; o:quantity 1 ; o:revenue "71247.64"^^xsd:decimal .
+<http://example.org/id/order/0058> a o:Order ; rdfs:label "Order 0058" ;
+    o:soldModelCode "RNG-19" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2025-08-20"^^xsd:date ; o:quantity 5 ; o:revenue "137455.17"^^xsd:decimal .
+<http://example.org/id/order/0059> a o:Order ; rdfs:label "Order 0059" ;
+    o:soldModelCode "F1L-22" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-11-16"^^xsd:date ; o:quantity 3 ; o:revenue "149618.80"^^xsd:decimal .
+<http://example.org/id/order/0060> a o:Order ; rdfs:label "Order 0060" ;
+    o:soldModelCode "PRI-16" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-11-18"^^xsd:date ; o:quantity 3 ; o:revenue "82032.55"^^xsd:decimal .
+<http://example.org/id/order/0061> a o:Order ; rdfs:label "Order 0061" ;
+    o:soldModelCode "DSC-17" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2025-04-14"^^xsd:date ; o:quantity 5 ; o:revenue "300863.52"^^xsd:decimal .
+<http://example.org/id/order/0062> a o:Order ; rdfs:label "Order 0062" ;
+    o:soldModelCode "EVQ-19" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2025-07-04"^^xsd:date ; o:quantity 2 ; o:revenue "92164.25"^^xsd:decimal .
+<http://example.org/id/order/0063> a o:Order ; rdfs:label "Order 0063" ;
+    o:soldModelCode "EX3-24" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2024-03-11"^^xsd:date ; o:quantity 2 ; o:revenue "67869.35"^^xsd:decimal .
+<http://example.org/id/order/0064> a o:Order ; rdfs:label "Order 0064" ;
+    o:soldModelCode "F15-21" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2025-07-10"^^xsd:date ; o:quantity 3 ; o:revenue "106804.90"^^xsd:decimal .
+<http://example.org/id/order/0065> a o:Order ; rdfs:label "Order 0065" ;
+    o:soldModelCode "COR-19" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2025-07-21"^^xsd:date ; o:quantity 3 ; o:revenue "66959.67"^^xsd:decimal .
+<http://example.org/id/order/0066> a o:Order ; rdfs:label "Order 0066" ;
+    o:soldModelCode "EVQ-19" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2024-09-27"^^xsd:date ; o:quantity 1 ; o:revenue "47525.32"^^xsd:decimal .
+<http://example.org/id/order/0067> a o:Order ; rdfs:label "Order 0067" ;
+    o:soldModelCode "EX3-24" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2024-10-15"^^xsd:date ; o:quantity 5 ; o:revenue "167448.82"^^xsd:decimal .
+<http://example.org/id/order/0068> a o:Order ; rdfs:label "Order 0068" ;
+    o:soldModelCode "TMY-20" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-12-04"^^xsd:date ; o:quantity 3 ; o:revenue "132358.42"^^xsd:decimal .
+<http://example.org/id/order/0069> a o:Order ; rdfs:label "Order 0069" ;
+    o:soldModelCode "F1L-22" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2024-04-04"^^xsd:date ; o:quantity 4 ; o:revenue "209320.35"^^xsd:decimal .
+<http://example.org/id/order/0070> a o:Order ; rdfs:label "Order 0070" ;
+    o:soldModelCode "DEF-20" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2024-12-07"^^xsd:date ; o:quantity 2 ; o:revenue "112772.28"^^xsd:decimal .
+<http://example.org/id/order/0071> a o:Order ; rdfs:label "Order 0071" ;
+    o:soldModelCode "F1L-22" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-03-28"^^xsd:date ; o:quantity 5 ; o:revenue "259077.88"^^xsd:decimal .
+<http://example.org/id/order/0072> a o:Order ; rdfs:label "Order 0072" ;
+    o:soldModelCode "COR-19" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2024-03-18"^^xsd:date ; o:quantity 2 ; o:revenue "43280.48"^^xsd:decimal .
+<http://example.org/id/order/0073> a o:Order ; rdfs:label "Order 0073" ;
+    o:soldModelCode "MUS-15" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2025-07-19"^^xsd:date ; o:quantity 2 ; o:revenue "62360.51"^^xsd:decimal .
+<http://example.org/id/order/0074> a o:Order ; rdfs:label "Order 0074" ;
+    o:soldModelCode "DEF-20" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2025-01-08"^^xsd:date ; o:quantity 1 ; o:revenue "57577.90"^^xsd:decimal .
+<http://example.org/id/order/0075> a o:Order ; rdfs:label "Order 0075" ;
+    o:soldModelCode "FTP-13" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2024-09-12"^^xsd:date ; o:quantity 1 ; o:revenue "67780.60"^^xsd:decimal .
+<http://example.org/id/order/0076> a o:Order ; rdfs:label "Order 0076" ;
+    o:soldModelCode "RNG-19" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2024-06-07"^^xsd:date ; o:quantity 2 ; o:revenue "56513.43"^^xsd:decimal .
+<http://example.org/id/order/0077> a o:Order ; rdfs:label "Order 0077" ;
+    o:soldModelCode "F15-21" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2024-01-26"^^xsd:date ; o:quantity 2 ; o:revenue "71922.61"^^xsd:decimal .
+<http://example.org/id/order/0078> a o:Order ; rdfs:label "Order 0078" ;
+    o:soldModelCode "TMY-20" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2025-11-16"^^xsd:date ; o:quantity 2 ; o:revenue "86521.00"^^xsd:decimal .
+<http://example.org/id/order/0079> a o:Order ; rdfs:label "Order 0079" ;
+    o:soldModelCode "EVQ-19" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2024-02-09"^^xsd:date ; o:quantity 4 ; o:revenue "180065.40"^^xsd:decimal .
+<http://example.org/id/order/0080> a o:Order ; rdfs:label "Order 0080" ;
+    o:soldModelCode "RAV-19" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2024-11-08"^^xsd:date ; o:quantity 2 ; o:revenue "55554.37"^^xsd:decimal .
+<http://example.org/id/order/0081> a o:Order ; rdfs:label "Order 0081" ;
+    o:soldModelCode "FTP-13" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2024-12-02"^^xsd:date ; o:quantity 3 ; o:revenue "211921.13"^^xsd:decimal .
+<http://example.org/id/order/0082> a o:Order ; rdfs:label "Order 0082" ;
+    o:soldModelCode "F1L-22" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2025-10-18"^^xsd:date ; o:quantity 5 ; o:revenue "252713.31"^^xsd:decimal .
+<http://example.org/id/order/0083> a o:Order ; rdfs:label "Order 0083" ;
+    o:soldModelCode "TMY-20" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2024-04-28"^^xsd:date ; o:quantity 3 ; o:revenue "128828.53"^^xsd:decimal .
+<http://example.org/id/order/0084> a o:Order ; rdfs:label "Order 0084" ;
+    o:soldModelCode "F1L-22" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2024-04-21"^^xsd:date ; o:quantity 5 ; o:revenue "253438.93"^^xsd:decimal .
+<http://example.org/id/order/0085> a o:Order ; rdfs:label "Order 0085" ;
+    o:soldModelCode "TMY-20" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2025-09-12"^^xsd:date ; o:quantity 5 ; o:revenue "213581.62"^^xsd:decimal .
+<http://example.org/id/order/0086> a o:Order ; rdfs:label "Order 0086" ;
+    o:soldModelCode "FTP-13" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2024-02-15"^^xsd:date ; o:quantity 4 ; o:revenue "263237.88"^^xsd:decimal .
+<http://example.org/id/order/0087> a o:Order ; rdfs:label "Order 0087" ;
+    o:soldModelCode "FTP-13" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2025-03-17"^^xsd:date ; o:quantity 1 ; o:revenue "71113.70"^^xsd:decimal .
+<http://example.org/id/order/0088> a o:Order ; rdfs:label "Order 0088" ;
+    o:soldModelCode "TMY-20" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2024-11-17"^^xsd:date ; o:quantity 1 ; o:revenue "44891.12"^^xsd:decimal .
+<http://example.org/id/order/0089> a o:Order ; rdfs:label "Order 0089" ;
+    o:soldModelCode "TM3-17" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2024-11-12"^^xsd:date ; o:quantity 4 ; o:revenue "154575.14"^^xsd:decimal .
+<http://example.org/id/order/0090> a o:Order ; rdfs:label "Order 0090" ;
+    o:soldModelCode "TM3-17" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2024-05-10"^^xsd:date ; o:quantity 2 ; o:revenue "77890.86"^^xsd:decimal .
+<http://example.org/id/order/0091> a o:Order ; rdfs:label "Order 0091" ;
+    o:soldModelCode "PRI-16" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2024-06-27"^^xsd:date ; o:quantity 5 ; o:revenue "137973.98"^^xsd:decimal .
+<http://example.org/id/order/0092> a o:Order ; rdfs:label "Order 0092" ;
+    o:soldModelCode "PRI-16" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2024-01-01"^^xsd:date ; o:quantity 3 ; o:revenue "80888.06"^^xsd:decimal .
+<http://example.org/id/order/0093> a o:Order ; rdfs:label "Order 0093" ;
+    o:soldModelCode "RNG-19" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2025-09-13"^^xsd:date ; o:quantity 3 ; o:revenue "82084.72"^^xsd:decimal .
+<http://example.org/id/order/0094> a o:Order ; rdfs:label "Order 0094" ;
+    o:soldModelCode "RAV-19" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2024-08-06"^^xsd:date ; o:quantity 5 ; o:revenue "141788.96"^^xsd:decimal .
+<http://example.org/id/order/0095> a o:Order ; rdfs:label "Order 0095" ;
+    o:soldModelCode "F15-21" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2024-03-27"^^xsd:date ; o:quantity 3 ; o:revenue "105973.51"^^xsd:decimal .
+<http://example.org/id/order/0096> a o:Order ; rdfs:label "Order 0096" ;
+    o:soldModelCode "TMY-20" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2024-08-28"^^xsd:date ; o:quantity 3 ; o:revenue "129326.12"^^xsd:decimal .
+<http://example.org/id/order/0097> a o:Order ; rdfs:label "Order 0097" ;
+    o:soldModelCode "FTP-13" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2024-01-26"^^xsd:date ; o:quantity 1 ; o:revenue "67171.12"^^xsd:decimal .
+<http://example.org/id/order/0098> a o:Order ; rdfs:label "Order 0098" ;
+    o:soldModelCode "XC9-15" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2024-03-15"^^xsd:date ; o:quantity 4 ; o:revenue "221879.40"^^xsd:decimal .
+<http://example.org/id/order/0099> a o:Order ; rdfs:label "Order 0099" ;
+    o:soldModelCode "FTP-13" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2025-12-14"^^xsd:date ; o:quantity 4 ; o:revenue "274274.05"^^xsd:decimal .
+<http://example.org/id/order/0100> a o:Order ; rdfs:label "Order 0100" ;
+    o:soldModelCode "IPC-18" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-11-02"^^xsd:date ; o:quantity 1 ; o:revenue "72821.72"^^xsd:decimal .
+<http://example.org/id/order/0101> a o:Order ; rdfs:label "Order 0101" ;
+    o:soldModelCode "EVQ-19" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2024-08-12"^^xsd:date ; o:quantity 2 ; o:revenue "94406.91"^^xsd:decimal .
+<http://example.org/id/order/0102> a o:Order ; rdfs:label "Order 0102" ;
+    o:soldModelCode "RAV-19" ; o:dealer <http://example.org/id/dealer/bayside> ;
+    o:orderDate "2025-07-24"^^xsd:date ; o:quantity 2 ; o:revenue "58777.06"^^xsd:decimal .
+<http://example.org/id/order/0103> a o:Order ; rdfs:label "Order 0103" ;
+    o:soldModelCode "EVQ-19" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2024-05-16"^^xsd:date ; o:quantity 4 ; o:revenue "186760.37"^^xsd:decimal .
+<http://example.org/id/order/0104> a o:Order ; rdfs:label "Order 0104" ;
+    o:soldModelCode "TMY-20" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2025-09-19"^^xsd:date ; o:quantity 5 ; o:revenue "219181.33"^^xsd:decimal .
+<http://example.org/id/order/0105> a o:Order ; rdfs:label "Order 0105" ;
+    o:soldModelCode "RAV-19" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-05-01"^^xsd:date ; o:quantity 4 ; o:revenue "111445.30"^^xsd:decimal .
+<http://example.org/id/order/0106> a o:Order ; rdfs:label "Order 0106" ;
+    o:soldModelCode "IPC-18" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2024-10-10"^^xsd:date ; o:quantity 5 ; o:revenue "352356.39"^^xsd:decimal .
+<http://example.org/id/order/0107> a o:Order ; rdfs:label "Order 0107" ;
+    o:soldModelCode "IPC-18" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2025-03-26"^^xsd:date ; o:quantity 1 ; o:revenue "71790.02"^^xsd:decimal .
+<http://example.org/id/order/0108> a o:Order ; rdfs:label "Order 0108" ;
+    o:soldModelCode "IPC-18" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2024-12-09"^^xsd:date ; o:quantity 3 ; o:revenue "218471.50"^^xsd:decimal .
+<http://example.org/id/order/0109> a o:Order ; rdfs:label "Order 0109" ;
+    o:soldModelCode "DSC-17" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2024-06-03"^^xsd:date ; o:quantity 2 ; o:revenue "114535.85"^^xsd:decimal .
+<http://example.org/id/order/0110> a o:Order ; rdfs:label "Order 0110" ;
+    o:soldModelCode "EX3-24" ; o:dealer <http://example.org/id/dealer/mustang> ;
+    o:orderDate "2024-08-07"^^xsd:date ; o:quantity 1 ; o:revenue "34061.63"^^xsd:decimal .
+<http://example.org/id/order/0111> a o:Order ; rdfs:label "Order 0111" ;
+    o:soldModelCode "TMY-20" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2025-04-22"^^xsd:date ; o:quantity 4 ; o:revenue "170096.63"^^xsd:decimal .
+<http://example.org/id/order/0112> a o:Order ; rdfs:label "Order 0112" ;
+    o:soldModelCode "RNG-19" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2025-08-21"^^xsd:date ; o:quantity 1 ; o:revenue "28239.08"^^xsd:decimal .
+<http://example.org/id/order/0113> a o:Order ; rdfs:label "Order 0113" ;
+    o:soldModelCode "PRI-16" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2024-01-07"^^xsd:date ; o:quantity 3 ; o:revenue "80966.68"^^xsd:decimal .
+<http://example.org/id/order/0114> a o:Order ; rdfs:label "Order 0114" ;
+    o:soldModelCode "PRI-16" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2025-07-05"^^xsd:date ; o:quantity 5 ; o:revenue "140558.52"^^xsd:decimal .
+<http://example.org/id/order/0115> a o:Order ; rdfs:label "Order 0115" ;
+    o:soldModelCode "IPC-18" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2024-08-12"^^xsd:date ; o:quantity 3 ; o:revenue "210571.25"^^xsd:decimal .
+<http://example.org/id/order/0116> a o:Order ; rdfs:label "Order 0116" ;
+    o:soldModelCode "COR-19" ; o:dealer <http://example.org/id/dealer/harbor> ;
+    o:orderDate "2024-12-10"^^xsd:date ; o:quantity 4 ; o:revenue "87818.24"^^xsd:decimal .
+<http://example.org/id/order/0117> a o:Order ; rdfs:label "Order 0117" ;
+    o:soldModelCode "RAV-19" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-09-29"^^xsd:date ; o:quantity 5 ; o:revenue "136612.81"^^xsd:decimal .
+<http://example.org/id/order/0118> a o:Order ; rdfs:label "Order 0118" ;
+    o:soldModelCode "PRI-16" ; o:dealer <http://example.org/id/dealer/liberty> ;
+    o:orderDate "2025-07-31"^^xsd:date ; o:quantity 1 ; o:revenue "26508.04"^^xsd:decimal .
+<http://example.org/id/order/0119> a o:Order ; rdfs:label "Order 0119" ;
+    o:soldModelCode "RNG-19" ; o:dealer <http://example.org/id/dealer/downtown> ;
+    o:orderDate "2025-04-17"^^xsd:date ; o:quantity 2 ; o:revenue "52865.28"^^xsd:decimal .
+<http://example.org/id/order/0120> a o:Order ; rdfs:label "Order 0120" ;
+    o:soldModelCode "PRI-16" ; o:dealer <http://example.org/id/dealer/empire> ;
+    o:orderDate "2024-08-04"^^xsd:date ; o:quantity 4 ; o:revenue "108208.54"^^xsd:decimal .

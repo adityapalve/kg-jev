@@ -1,0 +1,37 @@
+@prefix o: <http://example.org/onto#> .
+@prefix d: <http://example.org/id/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix kgqa: <https://kgqa.dev/ns#> .
+
+<http://example.org/id/dept/sales> a o:Department ; rdfs:label "Sales" .
+<http://example.org/id/dept/service> a o:Department ; rdfs:label "Service" .
+<http://example.org/id/dept/finance> a o:Department ; rdfs:label "Finance" .
+<http://example.org/id/employee/amoreno> a o:Employee ; rdfs:label "Alice Moreno" ;
+    o:worksAt <http://example.org/id/dealer/downtown> ; o:department <http://example.org/id/dept/sales> ; o:role "Sales Manager" ; o:hireDate "2019-04-01"^^xsd:date .
+<http://example.org/id/employee/bokafor> a o:Employee ; rdfs:label "Ben Okafor" ;
+    o:worksAt <http://example.org/id/dealer/downtown> ; o:department <http://example.org/id/dept/service> ; o:role "Service Technician" ; o:hireDate "2021-09-15"^^xsd:date .
+<http://example.org/id/employee/cliang> a o:Employee ; rdfs:label "Chen Liang" ;
+    o:worksAt <http://example.org/id/dealer/bayside> ; o:department <http://example.org/id/dept/sales> ; o:role "Sales Associate" ; o:hireDate "2022-02-01"^^xsd:date .
+<http://example.org/id/employee/dsilva> a o:Employee ; rdfs:label "Diana Silva" ;
+    o:worksAt <http://example.org/id/dealer/bayside> ; o:department <http://example.org/id/dept/finance> ; o:role "Finance Officer" ; o:hireDate "2018-06-11"^^xsd:date .
+<http://example.org/id/employee/ehansen> a o:Employee ; rdfs:label "Erik Hansen" ;
+    o:worksAt <http://example.org/id/dealer/harbor> ; o:department <http://example.org/id/dept/sales> ; o:role "Sales Manager" ; o:hireDate "2017-01-09"^^xsd:date .
+<http://example.org/id/employee/fnoor> a o:Employee ; rdfs:label "Farah Noor" ;
+    o:worksAt <http://example.org/id/dealer/harbor> ; o:department <http://example.org/id/dept/service> ; o:role "Service Advisor" ; o:hireDate "2023-03-20"^^xsd:date .
+<http://example.org/id/employee/gtanaka> a o:Employee ; rdfs:label "Gen Tanaka" ;
+    o:worksAt <http://example.org/id/dealer/liberty> ; o:department <http://example.org/id/dept/sales> ; o:role "Sales Associate" ; o:hireDate "2020-10-05"^^xsd:date .
+<http://example.org/id/employee/hbrooks> a o:Employee ; rdfs:label "Hannah Brooks" ;
+    o:worksAt <http://example.org/id/dealer/liberty> ; o:department <http://example.org/id/dept/finance> ; o:role "Finance Manager" ; o:hireDate "2016-07-18"^^xsd:date .
+<http://example.org/id/employee/ikowalski> a o:Employee ; rdfs:label "Igor Kowalski" ;
+    o:worksAt <http://example.org/id/dealer/mustang> ; o:department <http://example.org/id/dept/sales> ; o:role "Sales Manager" ; o:hireDate "2015-05-25"^^xsd:date .
+<http://example.org/id/employee/jreyes> a o:Employee ; rdfs:label "Julia Reyes" ;
+    o:worksAt <http://example.org/id/dealer/mustang> ; o:department <http://example.org/id/dept/service> ; o:role "Service Technician" ; o:hireDate "2024-01-08"^^xsd:date .
+<http://example.org/id/employee/kadams> a o:Employee ; rdfs:label "Kofi Adams" ;
+    o:worksAt <http://example.org/id/dealer/empire> ; o:department <http://example.org/id/dept/sales> ; o:role "Sales Associate" ; o:hireDate "2021-11-29"^^xsd:date .
+<http://example.org/id/employee/lpetrov> a o:Employee ; rdfs:label "Lena Petrov" ;
+    o:worksAt <http://example.org/id/dealer/empire> ; o:department <http://example.org/id/dept/sales> ; o:role "Sales Manager" ; o:hireDate "2019-08-12"^^xsd:date .

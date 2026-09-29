@@ -1,0 +1,132 @@
+@prefix o: <http://example.org/onto#> .
+@prefix d: <http://example.org/id/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix kgqa: <https://kgqa.dev/ns#> .
+
+<http://example.org/id/mfr/landrover> a o:Manufacturer ; rdfs:label "Land Rover" ;
+    skos:altLabel "LR" ;
+    o:country "United Kingdom" ; o:foundedYear 1948 .
+<http://example.org/id/mfr/ford> a o:Manufacturer ; rdfs:label "Ford" ;
+    skos:altLabel "Ford Motor Company" ;
+    o:country "United States" ; o:foundedYear 1903 .
+<http://example.org/id/mfr/tesla> a o:Manufacturer ; rdfs:label "Tesla" ;
+    o:country "United States" ; o:foundedYear 2003 .
+<http://example.org/id/mfr/toyota> a o:Manufacturer ; rdfs:label "Toyota" ;
+    o:country "Japan" ; o:foundedYear 1937 .
+<http://example.org/id/mfr/volvo> a o:Manufacturer ; rdfs:label "Volvo" ;
+    skos:altLabel "Volvo Cars" ;
+    o:country "Sweden" ; o:foundedYear 1927 .
+<http://example.org/id/mfr/jaguar> a o:Manufacturer ; rdfs:label "Jaguar" ;
+    o:country "United Kingdom" ; o:foundedYear 1922 .
+<http://example.org/id/fuel/electric> a o:FuelType ; rdfs:label "Electric" ;
+    skos:altLabel "EV" ;
+    skos:altLabel "battery electric" .
+<http://example.org/id/fuel/petrol> a o:FuelType ; rdfs:label "Petrol" ;
+    skos:altLabel "gasoline" ;
+    skos:altLabel "gas" .
+<http://example.org/id/fuel/diesel> a o:FuelType ; rdfs:label "Diesel" .
+<http://example.org/id/fuel/hybrid> a o:FuelType ; rdfs:label "Hybrid" ;
+    skos:altLabel "hybrid electric" .
+<http://example.org/id/engine/p400> a o:Engine ; rdfs:label "P400 Ingenium straight-six" ;
+    o:fuelType <http://example.org/id/fuel/petrol> ; o:horsepower 395 .
+<http://example.org/id/engine/d300> a o:Engine ; rdfs:label "D300 Ingenium diesel" ;
+    o:fuelType <http://example.org/id/fuel/diesel> ; o:horsepower 296 .
+<http://example.org/id/engine/p250> a o:Engine ; rdfs:label "P250 Ingenium four-cylinder" ;
+    o:fuelType <http://example.org/id/fuel/petrol> ; o:horsepower 246 .
+<http://example.org/id/engine/coyote> a o:Engine ; rdfs:label "Coyote 5.0 V8" ;
+    o:fuelType <http://example.org/id/fuel/petrol> ; o:horsepower 480 .
+<http://example.org/id/engine/ecoboost35> a o:Engine ; rdfs:label "3.5 EcoBoost V6" ;
+    o:fuelType <http://example.org/id/fuel/petrol> ; o:horsepower 400 .
+<http://example.org/id/engine/dualmotor580> a o:Engine ; rdfs:label "Extended range dual motor" ;
+    o:fuelType <http://example.org/id/fuel/electric> ; o:horsepower 580 .
+<http://example.org/id/engine/ecoboost23> a o:Engine ; rdfs:label "2.3 EcoBoost" ;
+    o:fuelType <http://example.org/id/fuel/petrol> ; o:horsepower 270 .
+<http://example.org/id/engine/rwd283> a o:Engine ; rdfs:label "Rear-wheel drive motor" ;
+    o:fuelType <http://example.org/id/fuel/electric> ; o:horsepower 283 .
+<http://example.org/id/engine/dualmotor384> a o:Engine ; rdfs:label "Long range dual motor" ;
+    o:fuelType <http://example.org/id/fuel/electric> ; o:horsepower 384 .
+<http://example.org/id/engine/m20a> a o:Engine ; rdfs:label "M20A Dynamic Force 2.0" ;
+    o:fuelType <http://example.org/id/fuel/petrol> ; o:horsepower 169 .
+<http://example.org/id/engine/a25hybrid> a o:Engine ; rdfs:label "A25A hybrid system" ;
+    o:fuelType <http://example.org/id/fuel/hybrid> ; o:horsepower 219 .
+<http://example.org/id/engine/2zrhybrid> a o:Engine ; rdfs:label "2ZR hybrid system" ;
+    o:fuelType <http://example.org/id/fuel/hybrid> ; o:horsepower 121 .
+<http://example.org/id/engine/b6> a o:Engine ; rdfs:label "B6 mild hybrid" ;
+    o:fuelType <http://example.org/id/fuel/hybrid> ; o:horsepower 295 .
+<http://example.org/id/engine/single268> a o:Engine ; rdfs:label "Single motor extended range" ;
+    o:fuelType <http://example.org/id/fuel/electric> ; o:horsepower 268 .
+<http://example.org/id/engine/dual394> a o:Engine ; rdfs:label "EV400 dual motor" ;
+    o:fuelType <http://example.org/id/fuel/electric> ; o:horsepower 394 .
+<http://example.org/id/engine/v8575> a o:Engine ; rdfs:label "5.0 supercharged V8" ;
+    o:fuelType <http://example.org/id/fuel/petrol> ; o:horsepower 575 .
+<http://example.org/id/model/defender> a o:SUV ; rdfs:label "Land Rover Defender" ;
+    skos:altLabel "Defender" ;
+    o:manufacturer <http://example.org/id/mfr/landrover> ; o:modelCode "DEF-20" ; o:launchYear 2020 ;
+    o:basePrice "56900.00"^^xsd:decimal ; o:seats 5 ; o:engine <http://example.org/id/engine/p400> .
+<http://example.org/id/model/discovery> a o:SUV ; rdfs:label "Land Rover Discovery" ;
+    skos:altLabel "Discovery" ;
+    o:manufacturer <http://example.org/id/mfr/landrover> ; o:modelCode "DSC-17" ; o:launchYear 2017 ;
+    o:basePrice "59000.00"^^xsd:decimal ; o:seats 7 ; o:engine <http://example.org/id/engine/d300> .
+<http://example.org/id/model/evoque> a o:SUV ; rdfs:label "Range Rover Evoque" ;
+    skos:altLabel "Evoque" ;
+    o:manufacturer <http://example.org/id/mfr/landrover> ; o:modelCode "EVQ-19" ; o:launchYear 2019 ;
+    o:basePrice "47000.00"^^xsd:decimal ; o:seats 5 ; o:engine <http://example.org/id/engine/p250> .
+<http://example.org/id/model/mustang> a o:Coupe ; rdfs:label "Ford Mustang" ;
+    skos:altLabel "Mustang" ;
+    o:manufacturer <http://example.org/id/mfr/ford> ; o:modelCode "MUS-15" ; o:launchYear 2015 ;
+    o:basePrice "32000.00"^^xsd:decimal ; o:seats 4 ; o:engine <http://example.org/id/engine/coyote> .
+<http://example.org/id/model/f150> a o:Pickup ; rdfs:label "Ford F-150" ;
+    skos:altLabel "F-150" ;
+    skos:altLabel "F150" ;
+    o:manufacturer <http://example.org/id/mfr/ford> ; o:modelCode "F15-21" ; o:launchYear 2021 ;
+    o:basePrice "36000.00"^^xsd:decimal ; o:seats 5 ; o:engine <http://example.org/id/engine/ecoboost35> .
+<http://example.org/id/model/lightning> a o:Pickup ; rdfs:label "Ford F-150 Lightning" ;
+    skos:altLabel "F-150 Lightning" ;
+    skos:altLabel "Lightning" ;
+    o:manufacturer <http://example.org/id/mfr/ford> ; o:modelCode "F1L-22" ; o:launchYear 2022 ;
+    o:basePrice "52000.00"^^xsd:decimal ; o:seats 5 ; o:engine <http://example.org/id/engine/dualmotor580> .
+<http://example.org/id/model/ranger> a o:Pickup ; rdfs:label "Ford Ranger" ;
+    skos:altLabel "Ranger" ;
+    o:manufacturer <http://example.org/id/mfr/ford> ; o:modelCode "RNG-19" ; o:launchYear 2019 ;
+    o:basePrice "28000.00"^^xsd:decimal ; o:seats 5 ; o:engine <http://example.org/id/engine/ecoboost23> .
+<http://example.org/id/model/model3> a o:Sedan ; rdfs:label "Tesla Model 3" ;
+    skos:altLabel "Model 3" ;
+    o:manufacturer <http://example.org/id/mfr/tesla> ; o:modelCode "TM3-17" ; o:launchYear 2017 ;
+    o:basePrice "40000.00"^^xsd:decimal ; o:seats 5 ; o:engine <http://example.org/id/engine/rwd283> .
+<http://example.org/id/model/modely> a o:SUV ; rdfs:label "Tesla Model Y" ;
+    skos:altLabel "Model Y" ;
+    o:manufacturer <http://example.org/id/mfr/tesla> ; o:modelCode "TMY-20" ; o:launchYear 2020 ;
+    o:basePrice "45000.00"^^xsd:decimal ; o:seats 7 ; o:engine <http://example.org/id/engine/dualmotor384> .
+<http://example.org/id/model/corolla> a o:Sedan ; rdfs:label "Toyota Corolla" ;
+    skos:altLabel "Corolla" ;
+    o:manufacturer <http://example.org/id/mfr/toyota> ; o:modelCode "COR-19" ; o:launchYear 2019 ;
+    o:basePrice "22000.00"^^xsd:decimal ; o:seats 5 ; o:engine <http://example.org/id/engine/m20a> .
+<http://example.org/id/model/rav4> a o:SUV ; rdfs:label "Toyota RAV4" ;
+    skos:altLabel "RAV4" ;
+    o:manufacturer <http://example.org/id/mfr/toyota> ; o:modelCode "RAV-19" ; o:launchYear 2019 ;
+    o:basePrice "29000.00"^^xsd:decimal ; o:seats 5 ; o:engine <http://example.org/id/engine/a25hybrid> .
+<http://example.org/id/model/prius> a o:Hatchback ; rdfs:label "Toyota Prius" ;
+    skos:altLabel "Prius" ;
+    o:manufacturer <http://example.org/id/mfr/toyota> ; o:modelCode "PRI-16" ; o:launchYear 2016 ;
+    o:basePrice "28000.00"^^xsd:decimal ; o:seats 5 ; o:engine <http://example.org/id/engine/2zrhybrid> .
+<http://example.org/id/model/xc90> a o:SUV ; rdfs:label "Volvo XC90" ;
+    skos:altLabel "XC90" ;
+    o:manufacturer <http://example.org/id/mfr/volvo> ; o:modelCode "XC9-15" ; o:launchYear 2015 ;
+    o:basePrice "57000.00"^^xsd:decimal ; o:seats 7 ; o:engine <http://example.org/id/engine/b6> .
+<http://example.org/id/model/ex30> a o:SUV ; rdfs:label "Volvo EX30" ;
+    skos:altLabel "EX30" ;
+    o:manufacturer <http://example.org/id/mfr/volvo> ; o:modelCode "EX3-24" ; o:launchYear 2024 ;
+    o:basePrice "35000.00"^^xsd:decimal ; o:seats 5 ; o:engine <http://example.org/id/engine/single268> .
+<http://example.org/id/model/ipace> a o:SUV ; rdfs:label "Jaguar I-Pace" ;
+    skos:altLabel "I-Pace" ;
+    o:manufacturer <http://example.org/id/mfr/jaguar> ; o:modelCode "IPC-18" ; o:launchYear 2018 ;
+    o:basePrice "72000.00"^^xsd:decimal ; o:seats 5 ; o:engine <http://example.org/id/engine/dual394> .
+<http://example.org/id/model/ftype> a o:Coupe ; rdfs:label "Jaguar F-Type" ;
+    skos:altLabel "F-Type" ;
+    o:manufacturer <http://example.org/id/mfr/jaguar> ; o:modelCode "FTP-13" ; o:launchYear 2013 ;
+    o:basePrice "70000.00"^^xsd:decimal ; o:seats 2 ; o:engine <http://example.org/id/engine/v8575> .

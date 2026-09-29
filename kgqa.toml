@@ -1,0 +1,68 @@
+# kgqa configuration for the bundled sample graph.
+# Copy and edit for another dataset (see docs/implementation-plan.md, "Pointing at a real graph").
+
+[store]
+kind = "oxigraph"          # "oxigraph" (embedded) or "http" (QLever / Oxigraph server / WDQS)
+path = ".kgqa/store"       # omit for in-memory
+# endpoint = "http://localhost:7001/sparql"
+
+[schema]
+ontology = ["data/sample/ontology.ttl"]
+shapes = ["data/sample/shapes.ttl"]
+catalog = ".kgqa/schema.json"
+entity_index = ".kgqa/entities.json"
+
+[controller]
+backend = "heuristic"      # "heuristic" (offline stand-in) | "typesafe" (jev; needs TYPESAFE_API_KEY)
+# model = "jev-latest"
+# timeout = 10.0
+cache = ".kgqa/jev-cache.jsonl"
+
+[llm]
+backend = "none"           # "none" | "python:your_module:factory" (see kgqa/llm/__init__.py)
+
+[pipeline]
+generation = "auto"        # "template" | "llm" | "auto" (templates when they apply, else LLM)
+beam_width = 2
+beam_min_prob = 0.15
+tie_policy = "try_next"    # "try_next" (next route in the beam) | "fallback"
+hop_mode = "app"           # "app" (small queries, joined in code at graph boundaries) | "fused" (one query)
+review_queue = ".kgqa/review_queue.jsonl"
+
+[gates]                    # confidence thresholds; tune with `kgqa eval`
+module = 0.45
+class = 0.35
+entity = 0.5
+plan = 0.35
+verify = 0.5
+
+[limits]
+query_limit = 1000
+query_timeout_s = 20.0
+values_chunk = 500
+max_intermediate = 10000
+max_repairs = 2
+max_path_edges = 3
+slice_token_budget = 1500
+
+[prefixes]
+o = "http://example.org/onto#"
+d = "http://example.org/id/"
+
+[[modules]]
+name = "catalog"
+graph = "http://example.org/graph/catalog"
+description = "Vehicle product catalog: manufacturers, vehicle models (SUVs, sedans, coupes, pickups, hatchbacks), engines, fuel types, prices, launch years, horsepower"
+files = ["data/sample/catalog.ttl"]
+
+[[modules]]
+name = "sales"
+graph = "http://example.org/graph/sales"
+description = "Sales: dealers and dealerships, sales regions, cities, orders, order dates, quantities sold, revenue"
+files = ["data/sample/sales.ttl"]
+
+[[modules]]
+name = "people"
+graph = "http://example.org/graph/people"
+description = "People and HR: employees, staff, departments, job roles, hire dates, which dealer employs whom"
+files = ["data/sample/people.ttl"]
