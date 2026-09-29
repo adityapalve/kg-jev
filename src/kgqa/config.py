@@ -51,6 +51,7 @@ class Config:
     store_endpoint: str | None = None
     ontology_files: list[str] = field(default_factory=list)
     shapes_files: list[str] = field(default_factory=list)
+    prune_unused: bool = False  # drop ontology classes/properties the data never uses
     catalog_path: str = ".kgqa/schema.json"
     entity_index_path: str = ".kgqa/entities.json"
     controller_backend: str = "heuristic"
@@ -102,6 +103,7 @@ def load_config(path: str | Path = "kgqa.toml") -> Config:
         store_endpoint=store.get("endpoint"),
         ontology_files=schema.get("ontology", []),
         shapes_files=schema.get("shapes", []),
+        prune_unused=schema.get("prune_unused", False),
         catalog_path=schema.get("catalog", ".kgqa/schema.json"),
         entity_index_path=schema.get("entity_index", ".kgqa/entities.json"),
         controller_backend=ctrl.get("backend", "heuristic"),

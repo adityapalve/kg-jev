@@ -160,16 +160,16 @@ class SchemaGraph:
         self.cat = cat
 
     def _prop_edges(self, cls: str, p: PropertyCard) -> list[Edge]:
-        step = Step(p.iri, False, p.module)
+        step = Step(p.iri, False, self.cat.module_for(p.iri, cls))
         if p.kind == "object":
-            return [Edge((step,), cls, p.range_class, "object", p.iri)]
+            return [Edge((step,), cls, r, "object", p.iri) for r in (p.ranges() or [None])]
         edges = [Edge((step,), cls, None, "attribute", p.iri, p.datatype)]
         for other in p.joins_with:
             q = self.cat.properties.get(other)
             if q is None:
                 continue
             for dom in q.domains or [None]:
-                edges.append(Edge((step, Step(q.iri, True, q.module)), cls, dom, "join", p.iri))
+                edges.append(Edge((step, Step(q.iri, True, self.cat.module_for(q.iri, dom))), cls, dom, "join", p.iri))
         return edges
 
     def out_edges(self, cls: str) -> list[Edge]:
@@ -182,7 +182,7 @@ class SchemaGraph:
         edges = []
         for p in self.cat.incoming_of(cls):
             for dom in p.domains or [None]:
-                edges.append(Edge((Step(p.iri, True, p.module),), cls, dom, "inverse", p.iri))
+                edges.append(Edge((Step(p.iri, True, self.cat.module_for(p.iri, dom)),), cls, dom, "inverse", p.iri))
         return edges
 
     def neighbours(self, cls: str) -> list[Edge]:

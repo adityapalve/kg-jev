@@ -14,6 +14,7 @@ from typing import Any
 
 from kgqa.rdf import IRI, literal_to_python
 from kgqa.store.base import QueryError, Store
+from kgqa.store.oxigraph import OxigraphStore
 
 
 @dataclass
@@ -90,10 +91,12 @@ def gold_answers(item: Item, store: Store, timeout: float = 60.0) -> list[Any] |
     if not item.gold_sparql:
         return None
     body = "\n".join(l for l in item.gold_sparql.splitlines() if not l.strip().upper().startswith("PREFIX")).lstrip().upper()
+    # Benchmark queries (QALD, LC-QuAD) do not name graphs: run them over the union of all graphs.
+    kw = {"union_default": True} if isinstance(store, OxigraphStore) else {}
     try:
         if body.startswith("ASK"):
-            return [store.ask(item.gold_sparql, timeout=timeout)]
-        res = store.select(item.gold_sparql, timeout=timeout)
+            return [store.ask(item.gold_sparql, timeout=timeout, **kw)]
+        res = store.select(item.gold_sparql, timeout=timeout, **kw)
     except QueryError:
         return None
     return list(dict.fromkeys(v for r in res.rows for v in [r.get(res.variables[0])] if v is not None)) if res.variables else []

@@ -38,3 +38,22 @@ def test_literal_values_become_string_filters(linker):
 def test_plural_value_mention(linker):
     (lit,) = linker.link("How many Sales Managers are there?").literals
     assert lit.value == "Sales Manager"
+
+
+def test_demonym_surname_and_popularity_aliases():
+    from kgqa.linking.index import DEMONYM, SURNAME, EntityIndex, EntityRecord
+
+    P = "http://ex.org/Person"
+    idx = EntityIndex({
+        "dk": EntityRecord("dk", "Denmark"),
+        "ak": EntityRecord("ak", "Akira Kurosawa", types=[P], popularity=40),
+        "rt": EntityRecord("rt", "Robert Taylor (actor)", types=[P], popularity=2),
+        "et": EntityRecord("et", "Elizabeth Taylor", types=[P], popularity=90),
+        "ti": EntityRecord("ti", "Titanic (1997 film)"),
+    })
+    assert idx.lookup_exact("danish")[0][0].iri == "dk" and idx.lookup_exact("danish")[0][1] >= DEMONYM
+    assert idx.lookup_exact("kurosawa")[0][0].iri == "ak"
+    assert [r.iri for r, _ in idx.lookup_exact("taylor")] == ["et", "rt"]  # the more popular Taylor first
+    assert all(score < 0.9 for _, score in idx.lookup_exact("taylor"))  # weak: the linker will ask jev
+    assert idx.lookup_exact("titanic")[0][0].iri == "ti"
+    assert SURNAME < DEMONYM

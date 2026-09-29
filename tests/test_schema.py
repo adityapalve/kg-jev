@@ -57,3 +57,24 @@ def test_paths_explain_themselves_in_plain_language(catalog):
     (join,) = [p for p in g.paths_between(O + "Order", O + "VehicleModel") if p.key() == "soldModelCode=modelCode"]
     assert join.label(catalog) == "vehicle model with matching model code"
     assert join.explain(catalog).startswith("From an order, follow the vehicle model whose model code equals its sold model code")
+
+
+def test_property_in_two_graphs_is_queried_where_its_subject_lives(tmp_path):
+    from kgqa.config import ModuleConfig
+    from kgqa.schema import SchemaBuilder
+    from kgqa.store import OxigraphStore
+
+    ex = "http://ex.org/"
+    (tmp_path / "films.nt").write_text(f"<{ex}f1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <{ex}Film> .\n<{ex}f1> <{ex}country> <{ex}fr> .\n")
+    (tmp_path / "places.nt").write_text(f"<{ex}paris> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <{ex}City> .\n<{ex}paris> <{ex}country> <{ex}fr> .\n<{ex}fr> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <{ex}Country> .\n")
+    store = OxigraphStore()
+    mods = [ModuleConfig("films", ex + "g/films"), ModuleConfig("places", ex + "g/places")]
+    for m in mods:
+        store.load_file(tmp_path / f"{m.name}.nt", m.graph)
+    cat = SchemaBuilder(store, mods).build()
+    assert cat.properties[ex + "country"].module_usage == {"films": 1, "places": 1}
+    assert set(cat.properties[ex + "country"].domains) == {ex + "Film", ex + "City"}
+    g = SchemaGraph(cat)
+    (film_path,) = g.paths_between(ex + "Film", ex + "Country", 1)
+    (city_path,) = g.paths_between(ex + "City", ex + "Country", 1)
+    assert film_path.steps[0].module == "films" and city_path.steps[0].module == "places"

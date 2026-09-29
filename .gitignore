@@ -6,3 +6,5 @@ __pycache__/
 reports/
 *.egg-info/
 .env
+data/dbpedia/*.nt
+data/dbpedia/qald-*.json

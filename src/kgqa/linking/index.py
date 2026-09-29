@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass, field
@@ -15,7 +16,7 @@ from pathlib import Path
 from typing import Protocol
 
 from kgqa.config import ModuleConfig
-from kgqa.rdf import IRI
+from kgqa.rdf import IRI, local_name
 from kgqa.store.base import Store
 from kgqa.text import normalize, trigram_similarity, trigrams
 
@@ -32,39 +33,82 @@ class EntityRecord:
     types: list[str] = field(default_factory=list)
     module: str = ""
     value_of: str | None = None  # set for literal values (e.g. a city name); iri is then synthetic
+    popularity: int = 0  # how many triples point at this entity; ranks otherwise-equal candidates
+
+
+# Alias kinds and how much a match on each is trusted. Weaker aliases make the linker ask jev.
+PRIMARY, ALT, STRIPPED, DEMONYM, SURNAME = 1.0, 0.92, 0.85, 0.8, 0.6
+PERSON_TYPES = {"Person", "Human", "Employee"}
+DEMONYMS = {
+    "Afghanistan": "Afghan", "Argentina": "Argentine Argentinian", "Australia": "Australian", "Austria": "Austrian",
+    "Belgium": "Belgian", "Brazil": "Brazilian", "Canada": "Canadian", "Chile": "Chilean", "China": "Chinese",
+    "Colombia": "Colombian", "Cuba": "Cuban", "Czech Republic": "Czech", "Czechoslovakia": "Czechoslovak",
+    "Denmark": "Danish", "Egypt": "Egyptian", "Finland": "Finnish", "France": "French", "Germany": "German",
+    "Greece": "Greek", "Hong Kong": "Hong Kong", "Hungary": "Hungarian", "Iceland": "Icelandic", "India": "Indian",
+    "Indonesia": "Indonesian", "Iran": "Iranian", "Ireland": "Irish", "Israel": "Israeli", "Italy": "Italian",
+    "Japan": "Japanese", "Mexico": "Mexican", "Netherlands": "Dutch", "New Zealand": "New Zealand",
+    "Nigeria": "Nigerian", "Norway": "Norwegian", "Pakistan": "Pakistani", "Peru": "Peruvian",
+    "Philippines": "Filipino Philippine", "Poland": "Polish", "Portugal": "Portuguese", "Romania": "Romanian",
+    "Russia": "Russian", "Soviet Union": "Soviet", "South Africa": "South African", "South Korea": "South Korean Korean",
+    "Spain": "Spanish", "Sweden": "Swedish", "Switzerland": "Swiss", "Taiwan": "Taiwanese", "Thailand": "Thai",
+    "Turkey": "Turkish", "Ukraine": "Ukrainian", "United Kingdom": "British English Scottish Welsh",
+    "United States": "American US", "Venezuela": "Venezuelan", "Vietnam": "Vietnamese",
+}
+_DEMONYM_ALIASES = {normalize(country): [normalize(d) for d in ds.split()] for country, ds in DEMONYMS.items()}
+_STRIP = re.compile(r"\s*\([^)]*\)\s*$")
 
 
 class EntityIndex:
     def __init__(self, records: dict[str, EntityRecord] | None = None, embedder: Embedder | None = None) -> None:
         self.records: dict[str, EntityRecord] = records or {}
         self.embedder = embedder
-        self._by_norm: dict[str, list[tuple[str, bool]]] = defaultdict(list)  # norm label -> [(iri, is_primary)]
+        self._by_norm: dict[str, list[tuple[str, float]]] = defaultdict(list)  # norm alias -> [(iri, alias score)]
         self._by_trigram: dict[str, set[str]] = defaultdict(set)
         self._vectors: list[list[float]] | None = None
         self._vector_keys: list[tuple[str, str]] = []
         self._reindex()
 
+    def _aliases(self, r: EntityRecord) -> list[tuple[str, float]]:
+        out = [(r.label, PRIMARY), *((l, ALT) for l in r.labels)]
+        out += [(base, STRIPPED) for n, _ in list(out) if (base := _STRIP.sub("", n)) != n and base]  # "Titanic (1997 film)"
+        if r.value_of is None:
+            for n, _ in list(out):
+                out += [(d, DEMONYM) for d in _DEMONYM_ALIASES.get(normalize(n), [])]  # "Danish" -> Denmark
+            if any(local_name(t) in PERSON_TYPES for t in r.types):
+                words = _STRIP.sub("", r.label).split()
+                if 2 <= len(words) <= 4 and words[-1][:1].isupper() and words[-1].isalpha() and len(words[-1]) >= 4:
+                    out.append((words[-1], SURNAME))  # "Kurosawa" -> Akira Kurosawa
+        return out
+
     def _reindex(self) -> None:
         self._by_norm.clear()
         self._by_trigram.clear()
         for r in self.records.values():
-            for lbl in dict.fromkeys([r.label, *r.labels]):
-                n = normalize(lbl)
-                if not n:
-                    continue
-                self._by_norm[n].append((r.iri, lbl == r.label))
-                for t in trigrams(lbl):
-                    self._by_trigram[t].add(n)
+            best: dict[str, float] = {}
+            for name, score in self._aliases(r):
+                n = normalize(name)
+                if n and score > best.get(n, 0.0):
+                    best[n] = score
+            for n, score in best.items():
+                self._by_norm[n].append((r.iri, score))
+                if score >= STRIPPED:  # fuzzy matching only over real names, not surnames/demonyms
+                    for t in trigrams(n):
+                        self._by_trigram[t].add(n)
         if self.embedder is not None:
             self._vector_keys = [(n, iri) for n, entries in self._by_norm.items() for iri, _ in entries]
             self._vectors = self.embedder.embed([n for n, _ in self._vector_keys]) if self._vector_keys else []
+
+    def _rank(self, rec: EntityRecord, score: float) -> float:
+        # popularity breaks ties between otherwise equal matches (many people are called Taylor)
+        return score + 0.04 * math.log10(1 + rec.popularity)
 
     @property
     def max_label_tokens(self) -> int:
         return max((len(n.split()) for n in self._by_norm), default=1)
 
     def lookup_exact(self, norm: str) -> list[tuple[EntityRecord, float]]:
-        return [(self.records[iri], 1.0 if primary else 0.92) for iri, primary in self._by_norm.get(norm, [])]
+        hits = [(self.records[iri], self._rank(self.records[iri], score)) for iri, score in self._by_norm.get(norm, [])]
+        return sorted(hits, key=lambda h: -h[1])
 
     def lookup_fuzzy(self, text: str, min_sim: float = 0.72, k: int = 5) -> list[tuple[EntityRecord, float]]:
         cands: dict[str, int] = defaultdict(int)
@@ -122,6 +166,11 @@ class EntityIndex:
                         rec.labels.append(label)
                     if t and t not in rec.types:
                         rec.types.append(t)
+        graphs = " ".join(f"<{m.graph}>" for m in modules)
+        q = f"SELECT ?o (COUNT(*) AS ?n) WHERE {{ VALUES ?g {{ {graphs} }} GRAPH ?g {{ ?s ?p ?o FILTER(isIRI(?o)) }} }} GROUP BY ?o"
+        for row in store.select(q).rows:
+            if row["o"] in records:
+                records[row["o"]].popularity = row["n"]
         return cls(records, embedder)
 
     def save(self, path: str | Path) -> None:

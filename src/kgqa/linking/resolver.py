@@ -93,7 +93,11 @@ class EntityLinker:
                     continue
                 hits = self.index.lookup_exact(span_norm)
                 if not hits and span_norm.endswith("s") and len(span_norm) > 4:
-                    hits = self.index.lookup_exact(span_norm[:-1])  # "Sales Managers" -> "Sales Manager"
+                    singular = span_norm[:-1]  # "Sales Managers" -> "Sales Manager"
+                    # ...but not "Spanish movies" -> a film titled "Spanish Movie": when the plural word is a
+                    # schema word (movie), the words are a description, so let "Spanish" match on its own.
+                    if not (n > 1 and singular.split()[-1] in self.schema_terms):
+                        hits = self.index.lookup_exact(singular)
                 if not hits:
                     continue
                 for k in range(i, i + n):
@@ -154,7 +158,8 @@ class EntityLinker:
             prior[key] = c.score
         criteria[NONE_KEY] = f'"{m.text}" is used as a general word or category here, not as the name of one specific thing'
         # Offline-only prior: a lowercase word that is also a schema term is usually not a name.
-        none_prior = 0.15 if m.capitalized else (0.8 if m.schema_overlap else 0.3)
+        weak = max((c.score for c in m.candidates), default=0.0) < 0.9
+        none_prior = 0.15 if m.capitalized else (0.8 if m.schema_overlap or weak else 0.3)
         prior = {k: p * (1 - none_prior) for k, p in prior.items()}
         prior[NONE_KEY] = none_prior
         return criteria, keys, prior

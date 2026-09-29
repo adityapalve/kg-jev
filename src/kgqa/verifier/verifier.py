@@ -63,7 +63,7 @@ class Verifier:
         self.limits = limits
 
     def _labels(self, values: list[Any], labeler) -> list[str]:
-        return [labeler(v) for v in values[:10]]
+        return [labeler(v) for v in values[:20]]
 
     def _probe(self, plan: QueryPlan, program: Program, res: ExecResult, relax: Callable[[], int | None] | None) -> dict[str, Any]:
         """Evidence for why a result is empty."""
@@ -126,16 +126,26 @@ class Verifier:
         if res.truncated:
             prior_ok = min(prior_ok, 0.5)
 
+        n = len(res.values)
+        shown = self._labels(res.values, labeler)
         state: dict[str, Any] = {
             "question": question,
-            "plan": plan.describe(self.cat) if plan else "LLM-generated query",
-            "result": self._labels(res.values, labeler) if res.values else "(empty)",
+            "what_the_system_did": plan.explain(self.cat) if plan else "Ran a query written by an LLM: " + " ".join(program.sparql()[-1].split())[:600],
+            "result": "(empty)" if not n else shown if n <= len(shown) else {"total": n, "first": shown, "note": f"{n} results in total; only the first {len(shown)} are shown"},
             "checks": checks,
         }
+        # Judge fidelity, not world knowledge: the graph may be incomplete, dated or use odd units
+        # (DBpedia stores Pulp Fiction's budget as 8, meaning millions). A repair can fix a wrong
+        # relation; it cannot fix the data, so doubting the data only sends good answers to fallback.
         questions: dict[str, Any] = {
             "answers": Noul(
-                instructions="Does this result answer the question as asked?",
-                criteria={"true": "The result is the kind of thing the question asks for and plausibly correct", "false": "The result is the wrong kind of thing, from the wrong relation, or missing"},
+                instructions="Did the system retrieve what the question asks for? Judge whether it used the right entity, "
+                "the right relation and the right kind of value. Do not judge whether the stored values match what you know "
+                "about the world: the data may be incomplete, dated, or in unusual units.",
+                criteria={
+                    "true": "What the system did matches the question: right entity, right relation, right kind of value",
+                    "false": "The system retrieved something else: the wrong relation, the wrong entity, or the wrong kind of value",
+                },
                 prior=prior_ok,
             )
         }

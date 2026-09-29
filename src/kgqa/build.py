@@ -40,7 +40,7 @@ def store_is_empty(store: Store) -> bool:
 
 
 def build_catalog(cfg: Config, store: Store) -> SchemaCatalog:
-    builder = SchemaBuilder(store, cfg.modules, [cfg.path(f) for f in cfg.ontology_files], [cfg.path(f) for f in cfg.shapes_files])
+    builder = SchemaBuilder(store, cfg.modules, [cfg.path(f) for f in cfg.ontology_files], [cfg.path(f) for f in cfg.shapes_files], prune_unused=cfg.prune_unused)
     return builder.build()
 
 

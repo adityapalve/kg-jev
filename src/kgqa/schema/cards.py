@@ -21,13 +21,18 @@ class PropertyCard:
     alt_labels: list[str] = field(default_factory=list)
     domains: list[str] = field(default_factory=list)
     range_class: str | None = None
+    extra_ranges: list[str] = field(default_factory=list)  # observed target classes the declared range misses
     datatype: str | None = None
     min_count: int | None = None
     max_count: int | None = None
     usage: int = 0
+    module_usage: dict[str, int] = field(default_factory=dict)  # a property can appear in several graphs
     samples: list[str] = field(default_factory=list)
     joins_with: list[str] = field(default_factory=list)  # shared-identifier properties in other modules
     identifier_scheme: str | None = None
+
+    def ranges(self) -> list[str]:
+        return [r for r in [self.range_class, *self.extra_ranges] if r]
 
     @property
     def numeric(self) -> bool:
@@ -128,10 +133,17 @@ class SchemaCatalog:
 
     def incoming_of(self, cls: str) -> list[PropertyCard]:
         targets = {cls, *self.ancestors(cls)}
-        return [p for p in self.properties.values() if p.kind == "object" and p.range_class in targets]
+        return [p for p in self.properties.values() if p.kind == "object" and targets & set(p.ranges())]
 
     def instance_count(self, cls: str) -> int:
         return sum(self.classes[c].instance_count for c in [cls, *self.descendants(cls)] if c in self.classes)
+
+    def module_for(self, prop: str, subject_class: str | None) -> str:
+        """The graph holding `prop` triples whose subject is a `subject_class` instance."""
+        card = self.properties[prop]
+        if subject_class in self.classes and self.classes[subject_class].module in card.module_usage:
+            return self.classes[subject_class].module
+        return card.module
 
     def module_of(self, iri: str) -> str | None:
         if iri in self.classes:

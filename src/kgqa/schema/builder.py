@@ -26,15 +26,24 @@ log = logging.getLogger(__name__)
 _SKIP_PROPS = {RDFS + "label", SKOS + "altLabel", SKOS + "prefLabel", RDFS + "comment", "http://schema.org/name", OWL + "sameAs"}
 
 
+_LITERAL_RANGES = {RDFS + "Literal", "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString", "http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral"}
+
+
+def _is_literal_range(rng: str) -> bool:
+    # XSD types, rdf:langString, and custom datatypes such as DBpedia's <http://dbpedia.org/datatype/usDollar>
+    return rng.startswith(XSD) or rng in _LITERAL_RANGES or "/datatype/" in rng
+
+
 def _vals(rows: Iterable[dict], *keys: str) -> list[tuple]:
     return [tuple(r.get(k) for k in keys) for r in rows]
 
 
 class SchemaBuilder:
-    def __init__(self, store: Store, modules: list[ModuleConfig], ontology_files: list[str | Path] = (), shapes_files: list[str | Path] = (), sample_values: int = 3) -> None:
+    def __init__(self, store: Store, modules: list[ModuleConfig], ontology_files: list[str | Path] = (), shapes_files: list[str | Path] = (), sample_values: int = 3, prune_unused: bool = False) -> None:
         self.store = store
         self.modules = modules
         self.sample_values = sample_values
+        self.prune_unused = prune_unused
         self.schema = OxigraphStore()
         for f in [*ontology_files, *shapes_files]:
             self.schema.load_file(f, None)
@@ -70,7 +79,7 @@ class SchemaBuilder:
             if dom and dom not in card.domains:
                 card.domains.append(dom)
             if rng:
-                if rng.startswith(XSD) or rng == RDFS + "Literal":
+                if _is_literal_range(rng):
                     card.kind, card.datatype = "datatype", rng
                 else:
                     card.kind, card.range_class = "object", rng
@@ -105,6 +114,18 @@ class SchemaBuilder:
             card.max_count = mx if mx is not None else card.max_count
             cat.classes.setdefault(tc, ClassCard(iri=tc, label=split_camel(local_name(tc)), module=""))
 
+    def _name_aliases(self, cat: SchemaCatalog) -> None:
+        """The IRI's own name is often the everyday word (dbo:Film is labelled "movie", dbo:writer
+        "auteur"), so keep it, and any extra labels, as aliases."""
+        extra: dict[str, list[str]] = {}
+        for x, label in _vals(self.schema.select(f"SELECT ?x ?l WHERE {{ ?x <{RDFS}label> ?l }}").rows, "x", "l"):
+            extra.setdefault(x, []).append(str(label))
+        for card in [*cat.classes.values(), *cat.properties.values()]:
+            names = [*extra.get(card.iri, []), split_camel(local_name(card.iri)).lower()]
+            for n in names:
+                if n and n.lower() != card.label.lower() and n not in card.alt_labels:
+                    card.alt_labels.append(n)
+
     # ------------------------------------------------------------------ statistics
     def _stats(self, cat: SchemaCatalog, m: ModuleConfig) -> tuple[dict[str, int], dict[str, int]]:
         g, tp = m.graph, m.type_predicate
@@ -134,15 +155,36 @@ class SchemaBuilder:
             if card is None:
                 kind = "object" if p in observed_rng else "datatype"
                 card = cat.properties[p] = PropertyCard(iri=p, label=split_camel(local_name(p)), module=m.name, kind=kind)
+            card.module_usage[m.name] = n
             if n > card.usage:
                 card.usage, card.module = n, m.name
-            if not card.domains and observed_dom.get(p):
+            if observed_dom.get(p):
+                # Data beats the ontology when they disagree: add subject classes the declared domains
+                # do not cover (e.g. dbo:country is used on films and on places).
                 total = {c: class_counts.get(c, 0) for c, _ in observed_dom[p]}
-                card.domains = [c for c, k in sorted(observed_dom[p], key=lambda x: -x[1]) if k >= 0.1 * max(total[c], 1)]
-            if card.kind == "object" and not card.range_class and observed_rng.get(p):
-                card.range_class = max(observed_rng[p], key=lambda x: x[1])[0]
-            if card.kind == "datatype" and not card.datatype:
-                card.datatype = observed_dt.get(p)
+                seen = [c for c, k in sorted(observed_dom[p], key=lambda x: -x[1]) if k >= 0.1 * max(total[c], 1)]
+                for c in seen:
+                    if not any(cat.is_a(c, d) for d in card.domains):
+                        card.domains.append(c)
+            if card.kind == "object" and observed_rng.get(p):
+                # Data beats the ontology here too: dbo:producer is declared to point at Agent, but in
+                # current DBpedia a Person is an Animal, not an Agent. Add the most specific observed
+                # target classes the declared range does not cover.
+                top = max(n for _, n in observed_rng[p])
+                frequent = sorted((rc for rc, n in observed_rng[p] if n >= 0.1 * top), key=lambda c: -len(cat.ancestors(c)))
+                for rc in frequent:
+                    covered = [card.range_class, *card.extra_ranges]
+                    if any(c and (cat.is_a(rc, c) or cat.is_a(c, rc)) for c in covered):
+                        continue
+                    if card.range_class is None:
+                        card.range_class = rc
+                    else:
+                        card.extra_ranges.append(rc)
+            observed = observed_dt.get(p)
+            if card.kind == "datatype" and (not card.datatype or (observed and observed.startswith(XSD) and not card.datatype.startswith(XSD))):
+                card.datatype = observed  # what the data actually holds wins over a custom declared range
+            if card.kind == "object" and p not in observed_rng and observed:
+                card.kind, card.range_class, card.datatype = "datatype", None, observed  # declared object, holds literals
             samples = self.store.select(
                 f"SELECT ?o (SAMPLE(?lbl) AS ?l) WHERE {{ GRAPH <{g}> {{ ?s <{p}> ?o }} OPTIONAL {{ GRAPH ?g2 {{ ?o <{RDFS}label> ?lbl }} }} }} GROUP BY ?o LIMIT {self.sample_values}"
             ).rows
@@ -188,12 +230,15 @@ class SchemaBuilder:
         self._ontology_classes(cat)
         self._ontology_properties(cat)
         self._shapes(cat)
+        self._name_aliases(cat)
         for m in self.modules:
             cat.modules[m.name] = ModuleCard(name=m.name, graph=m.graph, description=m.description, type_predicate=m.type_predicate)
         triple_counts = {}
         for m in self.modules:
             _, prop_counts = self._stats(cat, m)
             triple_counts[m.name] = sum(prop_counts.values())
+        if self.prune_unused:
+            self._prune(cat)
         self._store_labels(cat)
         self._assign_modules(cat)
         for p in cat.properties.values():
@@ -217,6 +262,26 @@ class SchemaBuilder:
                     linked.add(j.right_module if j.left_module == name else j.left_module)
             mc.linked_modules = sorted(linked - {name, ""})
         return cat
+
+    def _prune(self, cat: SchemaCatalog) -> None:
+        """Drop ontology classes and properties the data never uses (large ontologies like DBpedia's
+        declare thousands). A class stays if it or a descendant has instances; a property stays if used."""
+        keep = {c for c, card in cat.classes.items() if card.instance_count > 0}
+        for c in list(keep):
+            keep.update(cat.ancestors(c))
+        for c in list(cat.classes):
+            if c not in keep:
+                del cat.classes[c]
+        for card in cat.classes.values():
+            card.parents = [p for p in card.parents if p in keep]
+            card.children = [ch for ch in card.children if ch in keep]
+        for p in [p for p, card in cat.properties.items() if card.usage == 0]:
+            del cat.properties[p]
+        for card in cat.properties.values():
+            card.domains = [d for d in card.domains if d in keep]
+            card.extra_ranges = [r for r in card.extra_ranges if r in keep]
+            if card.range_class and card.range_class not in keep:
+                card.range_class = card.extra_ranges.pop(0) if card.extra_ranges else None
 
     def _assign_modules(self, cat: SchemaCatalog) -> None:
         # Classes without direct instances (abstract parents, value classes) inherit a module from

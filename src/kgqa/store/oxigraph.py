@@ -49,10 +49,11 @@ class OxigraphStore:
         if fmt is None:
             raise ValueError(f"Unsupported RDF file type: {file}")
         to_graph = ox.NamedNode(graph) if graph else ox.DefaultGraph()
+        # lenient: real-world dumps (DBpedia) contain IRIs a strict parser rejects
         if fmt in (ox.RdfFormat.N_QUADS, ox.RdfFormat.TRIG):
-            self.store.bulk_load(path=str(file), format=fmt)
+            self.store.bulk_load(path=str(file), format=fmt, lenient=True)
         else:
-            self.store.bulk_load(path=str(file), format=fmt, to_graph=to_graph)
+            self.store.bulk_load(path=str(file), format=fmt, to_graph=to_graph, lenient=True)
 
     def clear_graph(self, graph: str) -> None:
         self.store.remove_graph(ox.NamedNode(graph))
@@ -69,9 +70,9 @@ class OxigraphStore:
         except OSError as e:
             raise QueryError(str(e)) from e
 
-    def select(self, query: str, timeout: float | None = None) -> SelectResult:
+    def select(self, query: str, timeout: float | None = None, union_default: bool = False) -> SelectResult:
         def run() -> SelectResult:
-            res = self.store.query(query)
+            res = self.store.query(query, use_default_graph_as_union=union_default)
             if not isinstance(res, ox.QuerySolutions):
                 raise QueryError("Expected a SELECT query")
             variables = [v.value for v in res.variables]
@@ -79,9 +80,9 @@ class OxigraphStore:
 
         return self._run(run, timeout)
 
-    def ask(self, query: str, timeout: float | None = None) -> bool:
+    def ask(self, query: str, timeout: float | None = None, union_default: bool = False) -> bool:
         def run() -> bool:
-            res = self.store.query(query)
+            res = self.store.query(query, use_default_graph_as_union=union_default)
             if not isinstance(res, ox.QueryBoolean):
                 raise QueryError("Expected an ASK query")
             return bool(res)

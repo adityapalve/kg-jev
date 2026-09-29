@@ -1,0 +1,51 @@
+# kgqa configuration for the DBpedia films / people / places slice.
+#   .venv/bin/python data/dbpedia/fetch_dbpedia.py      # download (~15 min, resumable)
+#   .venv/bin/kgqa --config dbpedia.toml build
+#   .venv/bin/kgqa --config dbpedia.toml ask "Who directed Inception?" --controller openrouter
+
+[store]
+kind = "oxigraph"
+path = ".kgqa/dbpedia/store"
+
+[schema]
+ontology = ["data/dbpedia/ontology.nt"]   # DBpedia's own ontology: labels, comments, hierarchy, domains, ranges
+shapes = []                               # DBpedia has no SHACL: cards come from the ontology + statistics
+prune_unused = true                       # the ontology declares ~1.6k classes / ~6k properties; keep what the slice uses
+catalog = ".kgqa/dbpedia/schema.json"
+entity_index = ".kgqa/dbpedia/entities.json"
+
+[controller]
+backend = "openrouter"
+cache = ".kgqa/dbpedia/jev-cache.jsonl"
+
+[llm]
+backend = "none"                          # "openrouter" to enable LLM generation and fallback
+cache = ".kgqa/dbpedia/llm-cache.jsonl"
+
+[pipeline]
+review_queue = ".kgqa/dbpedia/review_queue.jsonl"
+
+[limits]
+max_path_edges = 2                        # DBpedia's many near-duplicate properties make 3-edge path lists explode
+
+[prefixes]
+dbo = "http://dbpedia.org/ontology/"
+dbr = "http://dbpedia.org/resource/"
+
+[[modules]]
+name = "films"
+graph = "https://kgqa.dev/graph/dbpedia/films"
+description = "Films and movies: directors, cast and starring actors, writers, producers, composers, cinematographers, editors, runtime (seconds), box-office gross and budget (US dollars), country, release date"
+files = ["data/dbpedia/films.nt"]
+
+[[modules]]
+name = "people"
+graph = "https://kgqa.dev/graph/dbpedia/people"
+description = "People who worked on films (actors, directors, writers, musicians, producers): birth date, death date, birthplace, place of death"
+files = ["data/dbpedia/people.nt"]
+
+[[modules]]
+name = "places"
+graph = "https://kgqa.dev/graph/dbpedia/places"
+description = "Places: countries, cities, towns and regions where people were born or died and where films were made, with their country and population"
+files = ["data/dbpedia/places.nt"]

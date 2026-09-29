@@ -39,3 +39,12 @@ def test_template_arm_regression_on_sample_benchmark(pipeline):
     assert summary["accuracy"] >= 0.85
     assert summary["by_tag"]["out-of-scope"] == 1.0
     assert "Arm C" in render(result, controller="heuristic", llm="none")
+
+
+def test_plans_explain_themselves_to_the_verifier(pipeline):
+    ans = pipeline.ask("What was the total revenue from F-150 orders in 2025?")
+    (verify,) = [j for j in ans.trace.jev if j.stage == "verify"]
+    said = verify.state["what_the_system_did"]
+    assert said.startswith("Compute the sum of the revenue over order records linked to Ford F-150")
+    assert "fidelity" not in verify.questions["answers"]["instructions"]  # plain words only
+    assert "Do not judge whether the stored values match" in verify.questions["answers"]["instructions"]

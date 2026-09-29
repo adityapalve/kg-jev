@@ -134,6 +134,35 @@ class QueryPlan:
             parts.append(f"order={self.order}")
         return "; ".join(parts)
 
+    def explain(self, cat: SchemaCatalog) -> str:
+        """The plan as one plain sentence, for the controller to judge against the question."""
+        ops = {"eq": "in/equal to", "gt": "greater than", "ge": "at least", "lt": "less than", "le": "at most"}
+        cls = cat.label(self.target_class) if self.target_class else "thing"
+        cond = [f"linked to {l.anchor.label} by {l.path.label(cat)}" for l in self.links]
+        cond += [f"whose {f.path.label(cat)} is {ops.get(f.op, f.op)} {f.literal.value if f.literal.kind == 'string' else f.literal.text}" for f in self.filters]
+        where = f" {', and '.join(cond)}" if cond else ""
+        measure = self.answer_path.label(cat) if self.answer_path else ""
+        if self.shape in ("lookup", "path") and self.subject and self.answer_path:
+            edges = self.answer_path.edges
+            if len(edges) == 1 and edges[0].kind == "inverse":  # "the movies whose film director is Kubrick"
+                prop = cat.properties.get(edges[0].prop)
+                return f"Find the {cat.label(edges[0].dst or '')} records whose {prop.label if prop else 'relation'} is {self.subject.label}."
+            return f"Look up the {measure} of {self.subject.label}."
+        if self.shape == "count":
+            return f"Count the {cls} records{where}."
+        if self.shape == "list":
+            return f"List the {cls} records{where}."
+        if self.shape == "aggregate":
+            return f"Compute the {self.agg} of the {measure} over {cls} records{where}."
+        if self.shape == "superlative":
+            return f"Find the {cls}{where} with the {'highest' if self.order == 'desc' else 'lowest'} {measure}."
+        if self.shape == "compare":
+            names = " and ".join(a.label for a in self.compare)
+            return f"Compare {names} by {measure} and pick the one with the {'higher' if self.order == 'desc' else 'lower'} value."
+        if self.shape == "boolean" and self.subject:
+            return f"Check whether {self.subject.label} is a {cls}{where}."
+        return self.describe(cat)
+
     def to_json(self, cat: SchemaCatalog) -> dict[str, Any]:
         return {
             "shape": self.shape,

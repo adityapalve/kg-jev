@@ -145,7 +145,51 @@ misroute at 0.21 confidence, which is the case calibration is meant to catch.
    vector DB behind `EntityIndex.lookup_*`), a store per module to make app-side hops real
    federation, and `SERVICE` compilation where the endpoint supports it.
 
-## 7. Known limitations
+## 7. DBpedia film slice (milestone 6, real data)
+
+`dbpedia.toml` runs the pipeline on a materialized slice of current DBpedia in three named graphs:
+
+- **films**: every `dbo:Film` with a director, a cast and a US-dollar gross (~20k films): credits,
+  runtime (seconds), gross and budget (USD, stored as `xsd:double`), country, release date
+- **people**: everyone credited on those films: DBpedia types, birth/death dates and places
+- **places**: those birth/death places and film countries, plus their countries: types, country,
+  population
+
+`data/dbpedia/fetch_dbpedia.py` downloads it from the public endpoint (resumable, batched,
+throttled). `data/dbpedia/build_benchmark.py` keeps the QALD-9 questions the slice can answer and
+recomputes their gold answers on it. Items are tagged `matches-qald` or `drift` against QALD's
+2016 answers. The ontology is DBpedia's own (~800 classes, ~3k properties), with no SHACL, pruned to
+what the slice uses.
+
+Changes real data forced:
+- a property can live in several graphs (`dbo:country` on films and on places); schema steps
+  now pick the graph from the subject's class (`SchemaCatalog.module_for`)
+- observed subject classes are added to declared domains when the data disagrees with the ontology
+- literal-typed ranges (`rdf:langString`, `http://dbpedia.org/datatype/...`) are values, not links
+- Wikipedia-style disambiguators are aliases: "Titanic (1997 film)" also answers to "Titanic"
+- benchmark gold queries run over the union of graphs (QALD queries do not name graphs)
+- leniency: files load with relaxed IRI validation
+- DBpedia's labels are not the everyday words (`dbo:Film` is "movie", `dbo:writer` is "auteur"), so
+  IRI local names and extra labels become aliases
+- entity linking needed demonyms (Danish → Denmark), surname aliases (Kurosawa) ranked by
+  popularity (in-degree), and weaker scores for disambiguator-stripped names so words like
+  "actors" are not linked to the film *Actors*; on the QALD subset this cut linking failures 11 → 1
+- Virtuoso returns `\uXXXX`-escaped IRIs in N-Triples that it then rejects inside queries; the
+  fetcher decodes them and bisects any batch that still fails
+
+Findings so far:
+- the slice holds ~695k triples (films 308k, people 317k, places 71k), 222 classes and 17
+  properties in use, 71,844 labelled entities; build takes ~11 s
+- current DBpedia types people only as Person/Animal/Eukaryote/Species (no Actor or Director), so
+  routing leans on properties rather than fine-grained classes
+- data quality is a real factor: the top "US-dollar" grosses are mislabelled currencies
+  (*Ask This of Rikyu* at $664 billion); Christopher Nolan has no birthplace
+- the QALD-9 filter keeps 45 of 558 questions; 7 still match QALD's 2016 answers, the rest drift
+- the offline stand-in scores 5/45 (11%) and falls back on 71%; it is not meaningful at this scale,
+  so the real measurement is `kgqa --config dbpedia.toml eval --benchmark data/dbpedia/benchmark.json
+  --arms C --controller openrouter`
+
+## 8. Known limitations
 
 - Templates do not cover: GROUP BY ("revenue per region"), negation ("models not made by Ford"),
   top-k with k>1, ordering on list questions, multiple subjects in a lookup, or arithmetic over two
