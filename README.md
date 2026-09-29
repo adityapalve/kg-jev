@@ -8,6 +8,38 @@ code executes them, carrying bindings across graph boundaries.
 - Design: [docs/architecture.md](docs/architecture.md)
 - What's built, decisions, next steps: [docs/implementation-plan.md](docs/implementation-plan.md)
 
+## Benchmark: jev + templates vs LLM
+
+![Latency per question and time by stage for jev + templates, LLM + templates, and LLM only](docs/img/timing-benchmark.png)
+
+45 QALD-9 questions on a DBpedia films / people / places slice (~695k triples), no caching, one
+run. jev is `jev-1.13`; every LLM role uses `openai/gpt-6-luna`.
+
+- **jev + templates:** jev makes the routing and planning decisions, templates write the SPARQL, and
+  the LLM only handles what templates cannot express.
+- **LLM + templates:** the same pipeline with the LLM answering jev's questions, which isolates the
+  decision-maker.
+- **LLM only:** the LLM writes one query per question from retrieved schema.
+
+What it shows:
+- Each jev decision takes ~0.3 s against 1.5–2.4 s for the LLM. End to end, the median is 2.8×
+  faster than LLM only and 6.8× faster than the same pipeline driven by the LLM.
+- Accuracy is a tie (84 / 87 / 82%, one or two questions apart). This run cannot rank the arms on it.
+- The slow tail is the LLM fallback: the ~20% of questions templates cannot express take 3–10 s,
+  so jev's p95 (7.9 s) is higher than LLM only's (5.7 s).
+- LLM only is flattered by DBpedia, whose vocabulary the model has seen in training. A private
+  graph removes that advantage.
+
+Reproduce (needs `OPENROUTER_API_KEY`; a few cents), then regenerate the page and this image:
+
+```bash
+scripts/timing_benchmark.sh
+```
+
+```bash
+.venv/bin/python scripts/plot_timing.py
+```
+
 ## Quickstart (offline, no API keys)
 
 ```bash
