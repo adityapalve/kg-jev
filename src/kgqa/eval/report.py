@@ -74,3 +74,26 @@ def render(result: dict[str, Any], *, controller: str, llm: str) -> str:
         q = r["question"].replace("|", "/")
         lines.append(f"| {r['arm']} | {r['id']} | {q} | {r['status']} | {r['source'] or ''} | {'✓' if r['correct'] else '✗'} | {pred} | {gold} | {r['failure'] or ''} |")
     return "\n".join(lines) + "\n"
+
+
+def compare(runs: dict[str, dict[str, Any]]) -> str:
+    """Markdown table comparing eval runs (each run's first arm)."""
+    names = list(runs)
+    arms = {n: next(iter(r["summary"].values())) for n, r in runs.items()}
+    rows = [
+        ("accuracy", lambda m: _pct(m["accuracy"])),
+        ("precision when answered", lambda m: _pct(m["precision_when_answered"])),
+        ("answered rate", lambda m: _pct(m["answered_rate"])),
+        ("latency p50 (ms)", lambda m: _ms(m["latency_p50_ms"])),
+        ("latency p95 (ms)", lambda m: _ms(m["latency_p95_ms"])),
+        ("controller calls / q", lambda m: f"{m['jev_calls_mean']:.1f}"),
+        ("LLM tokens / q", lambda m: f"{m['llm_tokens_mean']:.0f}"),
+        ("fallback rate", lambda m: _pct(m["fallback_rate"])),
+    ]
+    stages = sorted({st for m in arms.values() for st in m["stage_p50_ms"]})
+    rows += [(f"{st} p50 (ms)", lambda m, st=st: _ms(m["stage_p50_ms"].get(st, 0.0))) for st in stages]
+    lines = ["| metric | " + " | ".join(names) + " |", "|---|" + "---|" * len(names)]
+    for label, fn in rows:
+        lines.append(f"| {label} | " + " | ".join(fn(arms[n]) for n in names) + " |")
+    cal = [f"| {n} | " + ", ".join(f"{g} ECE {c['ece']:.2f}" for g, c in sorted(arms[n]["calibration"].items()) if g in ("module", "plan", "verify")) + " |" for n in names]
+    return "\n".join(lines + ["", "| run | calibration |", "|---|---|", *cal]) + "\n"

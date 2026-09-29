@@ -30,6 +30,11 @@ def _pipeline(args: argparse.Namespace):
     cfg = load_config(args.config)
     if getattr(args, "controller", None):
         cfg.controller_backend = args.controller
+    if getattr(args, "controller_model", None):
+        cfg.controller_model = args.controller_model
+    if getattr(args, "no_cache", False):  # timing runs must not replay cached answers
+        cfg.controller_cache = None
+        cfg.llm_cache = None
     if getattr(args, "llm", None):
         cfg.llm_backend = args.llm
     if getattr(args, "model", None):
@@ -103,6 +108,17 @@ def cmd_eval(args: argparse.Namespace) -> None:
     print(f"report: {out / 'report.md'}")
 
 
+def cmd_compare(args: argparse.Namespace) -> None:
+    """Side-by-side summary of several eval runs (each a directory with results.json)."""
+    from kgqa.eval.report import compare
+
+    runs = {Path(d).name: json.loads((Path(d) / "results.json").read_text()) for d in args.runs}
+    text = compare(runs)
+    if args.out:
+        Path(args.out).write_text(text)
+    print(text)
+
+
 def cmd_schema(args: argparse.Namespace) -> None:
     from kgqa.rdf import Prefixes
     from kgqa.schema import SchemaCatalog, Slicer
@@ -144,7 +160,9 @@ def main(argv: list[str] | None = None) -> None:
     a = sub.add_parser("ask", help="answer one question")
     a.add_argument("question")
     a.add_argument("--generation", choices=["template", "llm", "auto"])
-    a.add_argument("--controller", help="override [controller].backend")
+    a.add_argument("--controller", help="override [controller].backend: heuristic | typesafe | openrouter | openrouter-llm")
+    a.add_argument("--controller-model", help="model for the controller, e.g. jev-1.13, or an LLM id with openrouter-llm")
+    a.add_argument("--no-cache", action="store_true", help="do not replay cached controller/LLM answers (for timing)")
     a.add_argument("--llm", help="override [llm].backend, e.g. openrouter")
     a.add_argument("--model", help="override [llm].model, e.g. qwen/qwen3.8-27b:free")
     a.add_argument("--trace", action="store_true")
@@ -154,12 +172,19 @@ def main(argv: list[str] | None = None) -> None:
     e = sub.add_parser("eval", help="run benchmark arms and write a report")
     e.add_argument("--benchmark", default="data/sample/benchmark.json")
     e.add_argument("--arms", default="A,B,C")
-    e.add_argument("--controller", help="override [controller].backend")
+    e.add_argument("--controller", help="override [controller].backend: heuristic | typesafe | openrouter | openrouter-llm")
+    e.add_argument("--controller-model", help="model for the controller, e.g. jev-1.13, or an LLM id with openrouter-llm")
+    e.add_argument("--no-cache", action="store_true", help="do not replay cached controller/LLM answers (for timing)")
     e.add_argument("--llm", help="override [llm].backend, e.g. openrouter")
     e.add_argument("--model", help="override [llm].model, e.g. qwen/qwen3.8-27b:free")
     e.add_argument("--limit", type=int)
     e.add_argument("--out", default="reports/latest")
     e.set_defaults(fn=cmd_eval)
+
+    c = sub.add_parser("compare", help="compare eval runs side by side")
+    c.add_argument("runs", nargs="+", help="eval output directories")
+    c.add_argument("--out", help="write the markdown table here")
+    c.set_defaults(fn=cmd_compare)
 
     s = sub.add_parser("schema", help="print the module overview or a schema slice")
     s.add_argument("classes", nargs="*", help="class labels or prefixed IRIs to slice around")

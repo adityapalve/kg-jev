@@ -108,3 +108,18 @@ def test_openrouter_backend_targets_openrouter(monkeypatch):
     ctrl = make_controller("openrouter")
     assert ctrl.ask({"question": "q"}, {"n": Noul(instructions="?")}).noul("n").noul == 0.7  # OpenRouter's extra fields pass through
     assert seen == {"url": "https://openrouter.ai/api/v1/systemone", "auth": "Bearer sk-or-test", "model": "jev-1.13"}
+
+
+def test_llm_controller_parses_and_degrades():
+    from kgqa.jev.llm_controller import LLMController
+    from kgqa.llm import ScriptedLLM
+
+    good = ScriptedLLM(['```json\n{"m": {"choice": "sales", "confidence": 0.8}, "ok": {"yes": 0.3}}\n```'])
+    resp = LLMController(good).ask({"question": "q"}, {"m": Choice(criteria={"sales": "orders", "people": "staff", "other": None}), "ok": Noul(instructions="?")})
+    m = resp.choice("m")
+    assert m.choice == "sales" and m.confidence == 0.8 and abs(sum(m.probabilities.values()) - 1) < 1e-9
+    assert resp.noul("ok").noul == 0.3
+
+    bad = ScriptedLLM(['{"m": {"choice": "invented_option", "confidence": 0.99}}'])
+    m = LLMController(bad).ask({"question": "q"}, {"m": Choice(criteria={"a": None, "b": None})}).choice("m")
+    assert m.confidence == 0.0  # an invalid option is treated as no decision, so the gates catch it

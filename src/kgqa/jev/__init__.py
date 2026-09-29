@@ -60,6 +60,12 @@ def make_controller(backend: str = "heuristic", *, model: str | None = None, tim
             raise ValueError("Set the OPENROUTER_API_KEY environment variable")
         inner = TypeSafeController(model=model or "jev-1.13", timeout=timeout, api_key=key, base_url=OPENROUTER_BASE_URL)
         inner.name = f"openrouter:{model or 'jev-1.13'}"
+    elif backend == "openrouter-llm":
+        # a chat LLM answering the same questions, for benchmarking the controller itself
+        from kgqa.jev.llm_controller import LLMController
+        from kgqa.llm.openrouter import DEFAULT_MODEL, OpenRouterLLM
+
+        inner = LLMController(OpenRouterLLM(model=model or DEFAULT_MODEL, **kwargs))
     elif backend.startswith("python:"):
         _, module, attr = backend.split(":", 2)
         inner = getattr(importlib.import_module(module), attr)(model=model, **kwargs)
